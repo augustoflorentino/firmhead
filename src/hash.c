@@ -170,10 +170,18 @@ static const uint32_t fwh_sha256_k[64] = {
     0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};
 
+#define FWH_SHA256_ROUND(a, b, c, d, e, f, g, h, i)                                                          \
+    do {                                                                                                      \
+        uint32_t t1 = h + (FWH_ROR(e, 6) ^ FWH_ROR(e, 11) ^ FWH_ROR(e, 25)) + (g ^ (e & (f ^ g))) +           \
+                      fwh_sha256_k[i] + w[i];                                                                 \
+        d += t1;                                                                                              \
+        h = t1 + (FWH_ROR(a, 2) ^ FWH_ROR(a, 13) ^ FWH_ROR(a, 22)) + ((a & b) | (c & (a | b)));               \
+    } while (0)
+
 static void fwh_sha256_compress(void *state, const unsigned char *block)
 {
-    uint32_t *h = ((fwh_hash_t *)state)->h;
-    uint32_t w[64], v[8], s0, s1, t1, t2;
+    uint32_t *st = ((fwh_hash_t *)state)->h;
+    uint32_t w[64], s0, s1, a, b, c, d, e, f, g, h;
     int i;
 
     for (i = 0; i < 16; i++)
@@ -183,18 +191,18 @@ static void fwh_sha256_compress(void *state, const unsigned char *block)
         s1 = FWH_ROR(w[i - 2], 17) ^ FWH_ROR(w[i - 2], 19) ^ (w[i - 2] >> 10);
         w[i] = w[i - 16] + s0 + w[i - 7] + s1;
     }
-    memcpy(v, h, sizeof(v));
-    for (i = 0; i < 64; i++) {
-        s1 = FWH_ROR(v[4], 6) ^ FWH_ROR(v[4], 11) ^ FWH_ROR(v[4], 25);
-        t1 = v[7] + s1 + ((v[4] & v[5]) ^ (~v[4] & v[6])) + fwh_sha256_k[i] + w[i];
-        s0 = FWH_ROR(v[0], 2) ^ FWH_ROR(v[0], 13) ^ FWH_ROR(v[0], 22);
-        t2 = s0 + ((v[0] & v[1]) ^ (v[0] & v[2]) ^ (v[1] & v[2]));
-        memmove(v + 1, v, 7 * sizeof(v[0]));
-        v[4] += t1;
-        v[0] = t1 + t2;
+    a = st[0], b = st[1], c = st[2], d = st[3], e = st[4], f = st[5], g = st[6], h = st[7];
+    for (i = 0; i < 64; i += 8) {
+        FWH_SHA256_ROUND(a, b, c, d, e, f, g, h, i);
+        FWH_SHA256_ROUND(h, a, b, c, d, e, f, g, i + 1);
+        FWH_SHA256_ROUND(g, h, a, b, c, d, e, f, i + 2);
+        FWH_SHA256_ROUND(f, g, h, a, b, c, d, e, i + 3);
+        FWH_SHA256_ROUND(e, f, g, h, a, b, c, d, i + 4);
+        FWH_SHA256_ROUND(d, e, f, g, h, a, b, c, i + 5);
+        FWH_SHA256_ROUND(c, d, e, f, g, h, a, b, i + 6);
+        FWH_SHA256_ROUND(b, c, d, e, f, g, h, a, i + 7);
     }
-    for (i = 0; i < 8; i++)
-        h[i] += v[i];
+    st[0] += a, st[1] += b, st[2] += c, st[3] += d, st[4] += e, st[5] += f, st[6] += g, st[7] += h;
 }
 
 static const uint64_t fwh_sha512_k[80] = {

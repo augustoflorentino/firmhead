@@ -181,8 +181,8 @@ static int fwh_build_begin(void *ctx, const unsigned char *name, size_t name_len
     if (node == NULL)
         return FWH_ERR_NOMEM;
     memset(node, 0, sizeof(*node));
-    if ((node->name = fwh_text(b->image, name, name_len)) == NULL)
-        return FWH_ERR_NOMEM;
+    (void)name_len;
+    node->name = (const char *)name;
     node->parent = b->current;
     if (b->current == NULL) {
         b->root = node;
@@ -210,8 +210,10 @@ static int fwh_build_prop(void *ctx, const unsigned char *name, size_t name_len,
     fwh_builder_t *b = ctx;
     fwh_prop_t *prop = fwh_scratch(b->image, sizeof(*prop));
 
-    if (prop == NULL || (prop->name = fwh_text(b->image, name, name_len)) == NULL)
+    (void)name_len;
+    if (prop == NULL)
         return FWH_ERR_NOMEM;
+    prop->name = (const char *)name;
     prop->value = value;
     prop->len = len;
     prop->position = position;
