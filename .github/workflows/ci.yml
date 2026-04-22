@@ -75,3 +75,23 @@ jobs:
       - run: cmake --preset fuzz
       - run: cmake --build build/fuzz
       - run: ./build/fuzz/fuzz_open -max_total_time=60
+
+  big-endian-and-32-bit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mlugg/setup-zig@v1
+        with:
+          version: 0.13.0
+      - run: sudo apt-get update && sudo apt-get install -y qemu-user gcc-multilib zlib1g-dev
+      - run: |
+          for target in s390x-linux-musl mips-linux-musleabi; do
+            zig cc -target $target -std=c99 -O1 -Wall -Wextra -Werror -Iinclude \
+              -DFWH_TEST_DATA="\"$PWD/tests/data\"" tests/test_firmhead.c src/*.c -o test-$target
+            qemu-${target%%-*} ./test-$target
+          done
+      - run: |
+          gcc -m32 -std=c99 -Wall -Wextra -Werror -fsanitize=undefined -Iinclude \
+            -DFWH_TEST_DATA="\"$PWD/tests/data\"" tests/test_firmhead.c src/*.c -o test-i686
+          ./test-i686
+

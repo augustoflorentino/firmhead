@@ -28,7 +28,10 @@ static int failures;
 static const char *const files[] = {"baseline.bin",        "exposed.bin",          "damaged.bin",
                                     "nested.bin",          "signed_weak.bin",      "signed_images_only.bin",
                                     "signed_well.bin",     "tplink_safeloader.bin", "xiaomi_hdr1.bin",
-                                    "mikrotik_npk.bin",    "netgear_chk.bin",      "reolink_pak.bin"};
+                                    "mikrotik_npk.bin",    "netgear_chk.bin",      "reolink_pak.bin",
+                                    "fwtool_signed.bin",   "fwtool_placeholder.bin", "uimage_multi.bin",
+                                    "trx_v2.bin",          "fit_external.bin",     "fit_ambiguous.bin",
+                                    "safeloader_salted.bin"};
 
 static unsigned char *load(const char *name, size_t *out_len)
 {
@@ -59,7 +62,7 @@ static void open_all(const unsigned char *buf, size_t len)
     size_t offset, error_at;
     int format;
 
-    for (offset = 0; offset < len && offset < 64; offset++)
+    for (offset = 0; offset < len; offset = offset == 63 && len > 128 ? len - 64 : offset + 1)
         for (format = 1; format < FWH_FMT_COUNT; format++) {
             image = NULL;
             if (fwh_open(buf, len, offset, format, NULL, NULL, NULL, &image, &error_at) == FWH_OK)
@@ -228,10 +231,14 @@ static unsigned char *adversarial_fit(size_t *out_len, size_t tokens)
 
 static double seconds(void)
 {
+#ifdef _WIN32
+    return (double)clock() / CLOCKS_PER_SEC;
+#else
     struct timespec ts;
 
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (double)ts.tv_sec + (double)ts.tv_nsec / 1e9;
+#endif
 }
 
 typedef struct {

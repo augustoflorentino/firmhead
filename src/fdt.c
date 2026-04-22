@@ -637,7 +637,7 @@ static int fwh_fit_integrity(fwh_image_t *image)
     const fwh_checksum_t *checks = image->checks.items;
     const char *seen[16];
     size_t i, j, n = 0;
-    char text[256] = "";
+    const char *text = "";
 
     for (i = 0; i < image->checks.count && n < 16; i++) {
         for (j = 0; j < n && strcmp(seen[j], checks[i].algorithm) != 0; j++)
@@ -652,12 +652,9 @@ static int fwh_fit_integrity(fwh_image_t *image)
                 seen[i] = seen[j];
                 seen[j] = t;
             }
-    for (i = 0; i < n; i++) {
-        if (i)
-            strncat(text, ", ", sizeof(text) - strlen(text) - 1);
-        strncat(text, seen[i], sizeof(text) - strlen(text) - 1);
-    }
-    return n ? fwh_add_meta(image, "integrity", fwh_text(image, text, strlen(text))) : FWH_OK;
+    for (i = 0; i < n && text; i++)
+        text = i ? fwh_printf(image, "%s, %s", text, seen[i]) : seen[i];
+    return n ? fwh_add_meta(image, "integrity", text) : FWH_OK;
 }
 
 static int fwh_fit_description(fwh_image_t *image, const fwh_node_t *root)

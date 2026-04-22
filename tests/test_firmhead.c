@@ -36,6 +36,13 @@ static const sample_t samples[] = {
     {"mikrotik_npk.bin", 0, FWH_FMT_NPK, 3, 1, 0},
     {"netgear_chk.bin", 0, FWH_FMT_CHK, 2, 1, 0},
     {"reolink_pak.bin", 0, FWH_FMT_PAK, 2, 1, 0},
+    {"fwtool_signed.bin", 0x113, FWH_FMT_FWTOOL, 1, 1, 0},
+    {"fwtool_placeholder.bin", 0xe7, FWH_FMT_FWTOOL, 1, 1, 0},
+    {"uimage_multi.bin", 0, FWH_FMT_UIMAGE, 3, 1, 0},
+    {"trx_v2.bin", 0, FWH_FMT_TRX, 3, 1, 0},
+    {"fit_external.bin", 0, FWH_FMT_FIT, 2, 1, 0},
+    {"fit_ambiguous.bin", 0, FWH_FMT_FIT, 2, 1, 3},
+    {"safeloader_salted.bin", 0, FWH_FMT_SAFELOADER, 3, 1, 1},
 };
 
 static unsigned char *load(const char *name, size_t *out_len)

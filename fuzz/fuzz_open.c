@@ -12,7 +12,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     if (fwh_probe(data, size, 0, &formats) != FWH_OK)
         return 0;
-    for (format = 1; format < FWH_FMT_COUNT; format++) {
+#ifdef FWH_FUZZ_FORMAT
+    for (format = FWH_FUZZ_FORMAT; format == FWH_FUZZ_FORMAT; format++) {
+#else
+    for (format = 0; format < FWH_FMT_COUNT; format++) {
+#endif
         image = NULL;
         if (fwh_open(data, size, 0, format, NULL, NULL, NULL, &image, &error_at) != FWH_OK)
             continue;

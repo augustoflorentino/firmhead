@@ -30,8 +30,9 @@ static int fwh_weak(const char *algorithm, unsigned bits)
         lower[i] = (char)(algorithm[i] >= 'A' && algorithm[i] <= 'Z' ? algorithm[i] + 32 : algorithm[i]);
     lower[i] = '\0';
     named = fwh_rsa_bits(lower);
-    return fwh_contains(lower, "sha1") || fwh_contains(lower, "md5") || (bits && bits < FWH_MIN_RSA) ||
-           (named && named < FWH_MIN_RSA);
+    if (bits && (lower[0] == '\0' || fwh_contains(lower, "rsa")) && bits < FWH_MIN_RSA)
+        return 1;
+    return fwh_contains(lower, "sha1") || fwh_contains(lower, "md5") || (named && named < FWH_MIN_RSA);
 }
 
 static const char *fwh_append(fwh_image_t *image, const char *text, const char *item)
