@@ -1,0 +1,12 @@
+changelog:
+  exclude:
+    labels: [chore]
+  categories:
+    - title: Breaking changes
+      labels: [breaking]
+    - title: New formats
+      labels: [format]
+    - title: Fixes
+      labels: [fix]
+    - title: Everything else
+      labels: ['*']
