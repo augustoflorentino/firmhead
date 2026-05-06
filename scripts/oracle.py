@@ -33,9 +33,7 @@ def firmhead(info: str, path: str) -> dict:
         elif line.startswith("  check "):
             out.setdefault("states", []).append(line.split()[3])
             if m := re.match(r"^  check (\S+)\s+image\s+\w+\s+(\S+)\s+([0-9a-f]+)$", line):
-                out["checks"][m[2]] = (m[1], m[3])
-        elif m := re.match(r"^  check (\S+)\s+image\s+\w+\s+(\S+)\s+([0-9a-f]+)$", line):
-            out["checks"][m[2]] = (m[1], m[3])
+                out["checks"].setdefault(m[2], (m[1], m[3]))
         elif m := re.match(r"^  sig   (\S+) (\S+) configuration", line):
             out["sigs"].append((m[1].split("/")[0], m[2]))
     return out
@@ -47,7 +45,8 @@ def fit(text: str) -> dict:
     def flush():
         if section == "image":
             kind = TYPES.get(fields.get("Type", ""), fields.get("Type", ""))
-            comp = COMPRESSION.get(fields.get("Compression", ""), fields.get("Compression", ""))
+            comp = fields.get("Compression", "").removesuffix(" compressed")
+            comp = COMPRESSION.get(comp, comp)
             out["parts"].append((name, int(fields["Data Size"].split()[0]), comp, kind))
             if "Hash value" in fields:
                 out["checks"][name] = (fields["Hash algo"], fields["Hash value"])

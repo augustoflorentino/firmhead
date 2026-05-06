@@ -155,24 +155,46 @@ static int fwh_sl_signature(fwh_image_t *image, size_t offset)
                                                                                                      : FWH_ERR_NOMEM;
 }
 
+static size_t fwh_sl_text(const unsigned char *p, size_t limit)
+{
+    size_t n = 0;
+
+    while (n < limit && p[n] >= 32 && p[n] < 127)
+        n++;
+    return n < limit && p[n] != '\r' && p[n] != '\n' && p[n] != 0 ? 0 : n;
+}
+
+static size_t fwh_sl_vendor(const unsigned char *h, const unsigned char **out)
+{
+    uint32_t len = fwh_u32be(h + 0x14);
+    size_t n;
+
+    if (len > 0 && len <= 0x40 && (n = fwh_sl_text(h + 0x18, len)) > 0) {
+        *out = h + 0x18;
+        return n;
+    }
+    *out = h + 0x14;
+    return fwh_sl_text(h + 0x14, 0x40);
+}
+
 FWH_INTERNAL int fwh_parse_safeloader(fwh_image_t *image, size_t offset)
 {
     fwh_sl_part_t parts[FWH_SL_PARTS];
     const unsigned char *h = image->buf + offset;
-    size_t base = offset + FWH_SL_TABLE, kind_len = 0;
+    size_t base = offset + FWH_SL_TABLE, kind_len;
+    const unsigned char *kind;
     int count, i, status;
 
     if (!fwh_probe_safeloader(image->buf, image->buf_len, offset))
         return fwh_fail(image, FWH_ERR_FORMAT, offset);
     count = fwh_sl_parts(image->buf, image->buf_len, offset, parts);
     image->size = fwh_u32be(h);
-    while (kind_len < 0x2C && h[0x14 + kind_len] != '\n' && h[0x14 + kind_len] != 0)
-        kind_len++;
+    kind_len = fwh_sl_vendor(h, &kind);
     if (kind_len)
-        image->description = fwh_printf(image, "%.*s, %d partitions", (int)kind_len, (const char *)h + 0x14, count);
+        image->description = fwh_printf(image, "%.*s, %d partitions", (int)kind_len, (const char *)kind, count);
     else
         image->description = fwh_printf(image, "safeloader, %d partitions", count);
-    if (image->description == NULL || fwh_add_meta(image, "fw-type", fwh_text(image, h + 0x14, kind_len)))
+    if (image->description == NULL || (kind_len && fwh_add_meta(image, "vendor", fwh_text(image, kind, kind_len))))
         return FWH_ERR_NOMEM;
     for (i = 0; i < count; i++) {
         const char *name = fwh_text(image, image->buf + base + parts[i].name_at, parts[i].name_len);

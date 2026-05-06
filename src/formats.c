@@ -346,7 +346,8 @@ FWH_INTERNAL int fwh_parse_chk(fwh_image_t *image, size_t offset)
         return FWH_ERR_NOMEM;
     status |= fwh_chk_sum(image, "header", offset, header, fwh_u32be(h + 36), fwh_chk_header_sum(h, header));
     status |= fwh_chk_sum(image, "kernel", k, kernel, fwh_u32be(h + 16), fwh_netgear_sum(image->buf + k, kernel));
-    status |= fwh_chk_sum(image, "rootfs", r, rootfs, fwh_u32be(h + 20), fwh_netgear_sum(image->buf + r, rootfs));
+    if (rootfs)
+        status |= fwh_chk_sum(image, "rootfs", r, rootfs, fwh_u32be(h + 20), fwh_netgear_sum(image->buf + r, rootfs));
     status |= fwh_chk_sum(image, "image", k, (size_t)kernel + rootfs, fwh_u32be(h + 32),
                           fwh_netgear_sum(image->buf + k, (size_t)kernel + rootfs));
     return status ? FWH_ERR_NOMEM : FWH_OK;
@@ -356,7 +357,8 @@ FWH_INTERNAL int fwh_parse_chk(fwh_image_t *image, size_t offset)
 #define FWH_PAK_ENTRY 0x40
 #define FWH_PAK_ENTRIES 32
 
-static int fwh_pak_walk(const unsigned char *buf, size_t buf_len, size_t offset, fwh_image_t *image, uint64_t *out_end)
+static int fwh_pak_walk(const unsigned char *buf, size_t buf_len, size_t offset, fwh_image_t *image, uint64_t *out_end,
+                        size_t *out_count)
 {
     const unsigned char *h = buf + offset;
     uint64_t expected, start, size;
@@ -384,6 +386,7 @@ static int fwh_pak_walk(const unsigned char *buf, size_t buf_len, size_t offset,
             return -1;
         expected = start + size;
         *out_end = expected;
+        *out_count = i + 1;
         if (name_len == 0 || size == 0)
             continue;
         named++;
@@ -397,14 +400,18 @@ static int fwh_pak_walk(const unsigned char *buf, size_t buf_len, size_t offset,
 FWH_INTERNAL int fwh_probe_pak(const unsigned char *buf, size_t buf_len, size_t offset)
 {
     uint64_t end;
+    size_t count;
 
-    return fwh_pak_walk(buf, buf_len, offset, NULL, &end) > 0;
+    return fwh_pak_walk(buf, buf_len, offset, NULL, &end, &count) > 0;
 }
 
 FWH_INTERNAL int fwh_parse_pak(fwh_image_t *image, size_t offset)
 {
-    uint64_t end = 0;
-    int named = fwh_pak_walk(image->buf, image->buf_len, offset, image, &end);
+    static const unsigned char kind[4] = {2, 0, 0, 0};
+    const unsigned char *h = image->buf + offset;
+    uint64_t end = 0, first;
+    size_t count = 0;
+    int named = fwh_pak_walk(image->buf, image->buf_len, offset, image, &end, &count);
     fwh_checksum_t *check;
     uint32_t computed;
 
@@ -417,9 +424,10 @@ FWH_INTERNAL int fwh_parse_pak(fwh_image_t *image, size_t offset)
     check = fwh_add_check(image, "crc32", FWH_SCOPE_WHOLE, "", offset + FWH_PAK_TABLE, end - FWH_PAK_TABLE);
     if (check == NULL || image->description == NULL)
         return FWH_ERR_NOMEM;
-    computed = fwh_crc32(0, image->buf + offset + FWH_PAK_TABLE, (size_t)end - FWH_PAK_TABLE);
-    fwh_check_u32(check, fwh_u32le(image->buf + offset + 4), computed, 0);
-    if (check->state == FWH_CHECK_BAD)
-        check->state = FWH_CHECK_UNVERIFIABLE;
+    first = fwh_u32le(h + FWH_PAK_TABLE + 0x38);
+    computed = fwh_crc32(0xFFFFFFFFu, h + first, (size_t)(end - first));
+    computed = fwh_crc32(computed, kind, sizeof(kind));
+    computed = fwh_crc32(computed, h + FWH_PAK_TABLE, count * FWH_PAK_ENTRY) ^ 0xFFFFFFFFu;
+    fwh_check_u32(check, fwh_u32le(h + 4), computed, 0);
     return FWH_OK;
 }

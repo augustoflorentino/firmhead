@@ -32,10 +32,6 @@ uint32_t fwh_netgear_sum(const unsigned char *data, size_t data_len)
     for (i = 0; i < data_len; i++) {
         c0 += data[i];
         c1 += c0;
-        if ((i & 0xFFF) == 0xFFF) {
-            c0 = (c0 & 0xFFFF) + (c0 >> 16);
-            c1 = (c1 & 0xFFFF) + (c1 >> 16);
-        }
     }
     b = (c0 & 0xFFFF) + (c0 >> 16);
     c0 = ((b >> 16) + b) & 0xFFFF;
@@ -122,37 +118,46 @@ static void fwh_md5_compress(void *state, const unsigned char *block)
     h[3] += d;
 }
 
+#define FWH_SHA1_W(i) (w[(i) & 15] = FWH_ROL(w[((i) + 13) & 15] ^ w[((i) + 8) & 15] ^ w[((i) + 2) & 15] ^ w[(i) & 15], 1))
+#define FWH_SHA1_ROUND(a, b, c, d, e, f, k, x)                                                               \
+    do {                                                                                                   \
+        e += FWH_ROL(a, 5) + (f) + (k) + (x);                                                              \
+        b = FWH_ROL(b, 30);                                                                                \
+    } while (0)
+#define FWH_SHA1_FIVE(f, k, x, i)                                                                          \
+    do {                                                                                                   \
+        FWH_SHA1_ROUND(a, b, c, d, e, f(b, c, d), k, x(i));                                                \
+        FWH_SHA1_ROUND(e, a, b, c, d, f(a, b, c), k, x(i + 1));                                            \
+        FWH_SHA1_ROUND(d, e, a, b, c, f(e, a, b), k, x(i + 2));                                            \
+        FWH_SHA1_ROUND(c, d, e, a, b, f(d, e, a), k, x(i + 3));                                            \
+        FWH_SHA1_ROUND(b, c, d, e, a, f(c, d, e), k, x(i + 4));                                            \
+    } while (0)
+#define FWH_SHA1_CH(x, y, z) ((z) ^ ((x) & ((y) ^ (z))))
+#define FWH_SHA1_PARITY(x, y, z) ((x) ^ (y) ^ (z))
+#define FWH_SHA1_MAJ(x, y, z) (((x) & (y)) | ((z) & ((x) | (y))))
+#define FWH_SHA1_LOAD(i) (w[i])
+
 static void fwh_sha1_compress(void *state, const unsigned char *block)
 {
     uint32_t *h = ((fwh_hash_t *)state)->h;
-    uint32_t w[80], a = h[0], b = h[1], c = h[2], d = h[3], e = h[4], f, k, t;
+    uint32_t w[16], a = h[0], b = h[1], c = h[2], d = h[3], e = h[4];
     int i;
 
     for (i = 0; i < 16; i++)
         w[i] = fwh_be32(block + 4 * i);
-    for (; i < 80; i++)
-        w[i] = FWH_ROL(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1);
-    for (i = 0; i < 80; i++) {
-        if (i < 20) {
-            f = (b & c) | (~b & d);
-            k = 0x5A827999;
-        } else if (i < 40) {
-            f = b ^ c ^ d;
-            k = 0x6ED9EBA1;
-        } else if (i < 60) {
-            f = (b & c) | (b & d) | (c & d);
-            k = 0x8F1BBCDC;
-        } else {
-            f = b ^ c ^ d;
-            k = 0xCA62C1D6;
-        }
-        t = FWH_ROL(a, 5) + f + e + k + w[i];
-        e = d;
-        d = c;
-        c = FWH_ROL(b, 30);
-        b = a;
-        a = t;
-    }
+    for (i = 0; i < 15; i += 5)
+        FWH_SHA1_FIVE(FWH_SHA1_CH, 0x5A827999u, FWH_SHA1_LOAD, i);
+    FWH_SHA1_ROUND(a, b, c, d, e, FWH_SHA1_CH(b, c, d), 0x5A827999u, w[15]);
+    FWH_SHA1_ROUND(e, a, b, c, d, FWH_SHA1_CH(a, b, c), 0x5A827999u, FWH_SHA1_W(16));
+    FWH_SHA1_ROUND(d, e, a, b, c, FWH_SHA1_CH(e, a, b), 0x5A827999u, FWH_SHA1_W(17));
+    FWH_SHA1_ROUND(c, d, e, a, b, FWH_SHA1_CH(d, e, a), 0x5A827999u, FWH_SHA1_W(18));
+    FWH_SHA1_ROUND(b, c, d, e, a, FWH_SHA1_CH(c, d, e), 0x5A827999u, FWH_SHA1_W(19));
+    for (i = 20; i < 40; i += 5)
+        FWH_SHA1_FIVE(FWH_SHA1_PARITY, 0x6ED9EBA1u, FWH_SHA1_W, i);
+    for (; i < 60; i += 5)
+        FWH_SHA1_FIVE(FWH_SHA1_MAJ, 0x8F1BBCDCu, FWH_SHA1_W, i);
+    for (; i < 80; i += 5)
+        FWH_SHA1_FIVE(FWH_SHA1_PARITY, 0xCA62C1D6u, FWH_SHA1_W, i);
     h[0] += a;
     h[1] += b;
     h[2] += c;
