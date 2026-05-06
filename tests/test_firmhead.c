@@ -43,6 +43,20 @@ static const sample_t samples[] = {
     {"fit_external.bin", 0, FWH_FMT_FIT, 2, 1, 0},
     {"fit_ambiguous.bin", 0, FWH_FMT_FIT, 2, 1, 3},
     {"safeloader_salted.bin", 0, FWH_FMT_SAFELOADER, 3, 1, 1},
+    {"mkimage/weak-hash.itb", 0, FWH_FMT_FIT, 2, 1, 1},
+    {"mkimage/weak-hash.control.dtb", 0, FWH_FMT_DTB, 0, 1, 1},
+    {"mkimage/images-only.itb", 0, FWH_FMT_FIT, 2, 1, 1},
+    {"mkimage/images-only.control.dtb", 0, FWH_FMT_DTB, 0, 1, 0},
+    {"mkimage/partial.itb", 0, FWH_FMT_FIT, 2, 1, 1},
+    {"mkimage/partial.control.dtb", 0, FWH_FMT_DTB, 0, 1, 0},
+    {"mkimage/optional-key.itb", 0, FWH_FMT_FIT, 2, 1, 0},
+    {"mkimage/optional-key.control.dtb", 0, FWH_FMT_DTB, 0, 1, 1},
+    {"mkimage/unit-address.itb", 0, FWH_FMT_FIT, 2, 1, 1},
+    {"mkimage/unit-address.control.dtb", 0, FWH_FMT_DTB, 0, 1, 0},
+    {"mkimage/good-2048.itb", 0, FWH_FMT_FIT, 2, 1, 0},
+    {"mkimage/good-2048.control.dtb", 0, FWH_FMT_DTB, 0, 1, 0},
+    {"mkimage/good-4096.itb", 0, FWH_FMT_FIT, 2, 1, 0},
+    {"mkimage/good-4096.control.dtb", 0, FWH_FMT_DTB, 0, 1, 0},
 };
 
 static unsigned char *load(const char *name, size_t *out_len)
