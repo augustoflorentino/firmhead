@@ -421,10 +421,10 @@ FWH_INTERNAL int fwh_parse_pak(fwh_image_t *image, size_t offset)
         return fwh_fail(image, FWH_ERR_FORMAT, offset);
     image->size = end;
     image->description = fwh_join_parts(image, 0, -1);
-    check = fwh_add_check(image, "crc32", FWH_SCOPE_WHOLE, "", offset + FWH_PAK_TABLE, end - FWH_PAK_TABLE);
+    first = fwh_u32le(h + FWH_PAK_TABLE + 0x38);
+    check = fwh_add_check(image, "crc32", FWH_SCOPE_WHOLE, "", offset + first, end - first);
     if (check == NULL || image->description == NULL)
         return FWH_ERR_NOMEM;
-    first = fwh_u32le(h + FWH_PAK_TABLE + 0x38);
     computed = fwh_crc32(0xFFFFFFFFu, h + first, (size_t)(end - first));
     computed = fwh_crc32(computed, kind, sizeof(kind));
     computed = fwh_crc32(computed, h + FWH_PAK_TABLE, count * FWH_PAK_ENTRY) ^ 0xFFFFFFFFu;
