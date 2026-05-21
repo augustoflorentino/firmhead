@@ -4,6 +4,27 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 0.4.0 - 2026-05-21
+
+### Added
+
+- `fwh_signature_t` now says where the signature bytes are (`value_offset`, `value_size`) for
+  fwtool, TP-Link safeloader, Xiaomi HDR1 and MikroTik NPK, and which contiguous range a usign
+  signature covers (`signed_offset`, `signed_size`), so the caller can hand both to `usign` or
+  its own verifier.
+- usign signatures report the key fingerprint in `key_hint` (`usign key 0123456789abcdef`).
+- `firmhead-info` prints the signature value, the signed range and the key.
+
+### Fixed
+
+- OpenWrt image metadata came out empty on real sysupgrade images: the JSON follows alignment
+  padding of NUL bytes, which are now skipped.
+
+### Upgrading
+
+- `fwh_signature_t` grew four fields. Code that only reads the struct through
+  `fwh_signature_get` needs a rebuild and no change.
+
 ## 0.1.0 - 2026-05-21
 
 First release.

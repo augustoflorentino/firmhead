@@ -151,6 +151,8 @@ static int fwh_sl_signature(fwh_image_t *image, size_t offset)
         return FWH_ERR_NOMEM;
     sig->bits = (unsigned)(rounded * 8);
     sig->key_hint = "vendor area 0x130";
+    sig->value_offset = offset + FWH_SL_SIG_START;
+    sig->value_size = rounded;
     return fwh_add_part(image, "signature", offset + FWH_SL_SIG_START, rounded, FWH_ROLE_SIGNATURE) ? FWH_OK
                                                                                                      : FWH_ERR_NOMEM;
 }
@@ -263,6 +265,8 @@ static int fwh_hdr1_signature(fwh_image_t *image, size_t at)
         return FWH_ERR_NOMEM;
     sig->bits = length * 8;
     sig->key_hint = fwh_printf(image, "appended at 0x%zx", at);
+    sig->value_offset = at + 16;
+    sig->value_size = length;
     return fwh_add_part(image, "signature", at + 16, length, FWH_ROLE_SIGNATURE) ? FWH_OK : FWH_ERR_NOMEM;
 }
 
@@ -310,6 +314,8 @@ static int fwh_npk_part(fwh_image_t *image, int kind, size_t start, uint32_t siz
                           FWH_SCOPE_WHOLE, "whole image");
         if (sig == NULL || fwh_add_part(image, "signature", start, size, FWH_ROLE_SIGNATURE) == NULL)
             return FWH_ERR_NOMEM;
+        sig->value_offset = start;
+        sig->value_size = size;
         return FWH_OK;
     default:
         return FWH_OK;

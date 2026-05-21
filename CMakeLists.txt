@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(firmhead VERSION 0.1.0 DESCRIPTION "Firmware container headers: parse, verify checksums and audit signing" LANGUAGES C)
+project(firmhead VERSION 0.4.0 DESCRIPTION "Firmware container headers: parse, verify checksums and audit signing" LANGUAGES C)
 
 option(FIRMHEAD_BUILD_TESTS "Build tests" OFF)
 option(FIRMHEAD_BUILD_EXAMPLES "Build examples" OFF)

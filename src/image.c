@@ -245,6 +245,7 @@ FWH_INTERNAL fwh_signature_t *fwh_add_sig(fwh_image_t *image, const char *node, 
     sig->key_hint = "";
     sig->scope = scope;
     sig->covers = covers;
+    sig->value_offset = sig->value_size = sig->signed_offset = sig->signed_size = 0;
     return sig;
 }
 

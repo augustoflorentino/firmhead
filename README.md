@@ -6,7 +6,8 @@ Xiaomi HDR1, MikroTik NPK, Netgear CHK, Reolink PAK, U-Boot FIT and plain device
 
 For each image it reports the parts (offset, size, role, compression), the metadata, every
 checksum with its state (`ok`, `bad`, or `unverifiable` when the format gives no way to check),
-signatures and verification keys, and, through `fwh_audit`, the known FIT signing mistakes:
+signatures and verification keys (with where the signature bytes sit and, when the format signs a
+contiguous range, which bytes it covers, so the caller can verify with its own crypto), and, through `fwh_audit`, the known FIT signing mistakes:
 weak algorithms or keys, images signed without the configuration, signed configurations that
 load unsigned images, keys that are present but not required, and ambiguous node names.
 

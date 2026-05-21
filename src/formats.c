@@ -234,6 +234,39 @@ FWH_INTERNAL int fwh_probe_fwtool(const unsigned char *buf, size_t buf_len, size
     return fwh_fwtool_read(buf, buf_len, offset, &kind, &size);
 }
 
+static int fwh_b64(unsigned char c)
+{
+    if (c >= 'A' && c <= 'Z')
+        return c - 'A';
+    if (c >= 'a' && c <= 'z')
+        return c - 'a' + 26;
+    if (c >= '0' && c <= '9')
+        return c - '0' + 52;
+    return c == '+' ? 62 : c == '/' ? 63 : -1;
+}
+
+static const char *fwh_usign_key(fwh_image_t *image, const unsigned char *data, size_t len)
+{
+    unsigned char raw[10];
+    size_t i = 0, n = 0, bits = 0;
+    uint32_t acc = 0;
+    int v;
+
+    while (i < len && data[i] != '\n')
+        i++;
+    for (i++; i < len && n < sizeof(raw) && (v = fwh_b64(data[i])) >= 0; i++) {
+        acc = (acc << 6) | (uint32_t)v;
+        if ((bits += 6) >= 8) {
+            bits -= 8;
+            raw[n++] = (unsigned char)(acc >> bits);
+        }
+    }
+    if (n < sizeof(raw) || raw[0] != 'E' || raw[1] != 'd')
+        return "";
+    return fwh_printf(image, "usign key %02x%02x%02x%02x%02x%02x%02x%02x", raw[2], raw[3], raw[4], raw[5], raw[6],
+                      raw[7], raw[8], raw[9]);
+}
+
 FWH_INTERNAL int fwh_parse_fwtool(fwh_image_t *image, size_t offset)
 {
     static const char placeholder[] = "# fake certificate";
@@ -252,7 +285,11 @@ FWH_INTERNAL int fwh_parse_fwtool(fwh_image_t *image, size_t offset)
     image->size = size;
     if (kind == 1) {
         image->description = "OpenWrt image metadata";
-        if (fwh_add_part(image, "metadata", start, data_len, FWH_ROLE_METADATA) == NULL ||
+        while (data_len > 0 && *data == 0) {
+            data++;
+            data_len--;
+        }
+        if (fwh_add_part(image, "metadata", (size_t)(data - image->buf), data_len, FWH_ROLE_METADATA) == NULL ||
             fwh_add_meta(image, "metadata", fwh_text(image, data, data_len)))
             return FWH_ERR_NOMEM;
         return FWH_OK;
@@ -268,6 +305,11 @@ FWH_INTERNAL int fwh_parse_fwtool(fwh_image_t *image, size_t offset)
     if (sig == NULL)
         return FWH_ERR_NOMEM;
     sig->bits = 256;
+    sig->value_offset = start;
+    sig->value_size = data_len;
+    sig->signed_size = start;
+    if ((sig->key_hint = fwh_usign_key(image, data, data_len)) == NULL)
+        return FWH_ERR_NOMEM;
     return fwh_add_meta(image, "integrity", "fwtool");
 }
 

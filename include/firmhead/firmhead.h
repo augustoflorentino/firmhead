@@ -111,6 +111,10 @@ typedef struct fwh_signature {
     const char *key_hint;
     int scope;
     const char *covers;
+    uint64_t value_offset;
+    uint64_t value_size;
+    uint64_t signed_offset;
+    uint64_t signed_size;
 } fwh_signature_t;
 
 typedef struct fwh_key {

@@ -300,6 +300,28 @@ static void test_arguments(void)
     EXPECT(strcmp(fwh_format_name(FWH_FMT_FIT), "fit") == 0);
 }
 
+static void test_signature_regions(void)
+{
+    size_t len, error_at;
+    unsigned char *buf = load("fwtool_signed.bin", &len);
+    fwh_image_t *image = NULL;
+    const fwh_signature_t *s;
+
+    if (buf == NULL || fwh_open(buf, len, len - 16, FWH_FMT_FWTOOL, NULL, NULL, NULL, &image, &error_at) != FWH_OK ||
+        fwh_signature_count(image) != 1) {
+        failures++;
+    } else {
+        s = fwh_signature_get(image, 0);
+        if (s->signed_offset != 0 || s->signed_size != s->value_offset ||
+            s->value_offset + s->value_size + 16 != len || strcmp(s->key_hint, "usign key 0123456789abcdef") != 0) {
+            fprintf(stderr, "fwtool signature region or key wrong\n");
+            failures++;
+        }
+    }
+    fwh_image_destroy(image);
+    free(buf);
+}
+
 int main(void)
 {
     size_t i, len;
@@ -307,6 +329,7 @@ int main(void)
 
     test_vectors();
     test_arguments();
+    test_signature_regions();
     for (i = 0; i < sizeof(samples) / sizeof(samples[0]); i++) {
         if ((buf = load(samples[i].file, &len)) == NULL) {
             fprintf(stderr, "missing %s\n", samples[i].file);

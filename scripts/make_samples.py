@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import struct
 import sys
@@ -24,7 +25,8 @@ def sysupgrade() -> bytes:
     image = uimage(kernel_payload(), "OpenWrt kernel", compression="lzma")
     meta = b'{"metadata_version":"1.1","supported_devices":["corpus,board"]}'
     signed = fwtool(image, 1, meta)
-    return fwtool(signed, 0, b"untrusted comment: signed by key 0123\n" + b"R" * 96 + b"\n")
+    blob = base64.b64encode(b"Ed" + bytes.fromhex("0123456789abcdef") + b"\x5a" * 64)
+    return fwtool(signed, 0, b"untrusted comment: signed by key 0123456789abcdef\n" + blob + b"\n")
 
 def placeholder() -> bytes:
     return fwtool(uimage(kernel_payload(), "OpenWrt kernel"), 0, b"# fake certificate\n")

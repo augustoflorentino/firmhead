@@ -64,6 +64,12 @@ static void print_image(const fwh_image_t *image)
         const fwh_signature_t *s = fwh_signature_get(image, i);
 
         printf("  sig   %s %s %s covers %s\n", s->node, s->algorithm, fwh_scope_name(s->scope), s->covers);
+        if (s->value_size)
+            printf("        value 0x%llx+%llu", (unsigned long long)s->value_offset, (unsigned long long)s->value_size);
+        if (s->signed_size)
+            printf(", signs 0x%llx+%llu", (unsigned long long)s->signed_offset, (unsigned long long)s->signed_size);
+        if (s->value_size)
+            printf("%s%s\n", *s->key_hint ? ", " : "", s->key_hint);
     }
     for (i = 0; i < fwh_key_count(image); i++) {
         const fwh_key_t *k = fwh_key_get(image, i);
