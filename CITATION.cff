@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "When firmhead is part of a firmware study, cite it as below."
+type: software
+title: firmhead
+abstract: "C99 library that maps router and embedded firmware images: parts, checksums, signatures and FIT signing mistakes"
+authors:
+  - family-names: Florentino
+    given-names: Augusto
+license: MIT
+repository-code: "https://github.com/augustoflorentino/firmhead"
+keywords:
+  - c
+  - c99
+  - library
+  - firmware
+  - uimage
+  - u-boot
+  - fit
+  - embedded
+  - router
