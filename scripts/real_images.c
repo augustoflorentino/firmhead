@@ -78,9 +78,25 @@ static size_t ok_count(const unsigned char *buf, size_t len, hit_t h, fwh_image_
     return n;
 }
 
+static int in_part(const fwh_image_t *image, size_t at)
+{
+    size_t i;
+
+    for (i = 0; i < fwh_part_count(image); i++) {
+        const fwh_part_t *p = fwh_part_get(image, i);
+
+        if (at >= p->offset && at - p->offset < p->size)
+            return 1;
+    }
+    return 0;
+}
+
 static int covered(const fwh_image_t *image, size_t at)
 {
     size_t i;
+
+    if (fwh_image_format(image) == FWH_FMT_ANDROID && !in_part(image, at))
+        return 0;
 
     for (i = 0; i < fwh_checksum_count(image); i++) {
         const fwh_checksum_t *c = fwh_checksum_get(image, i);

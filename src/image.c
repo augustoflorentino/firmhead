@@ -294,6 +294,8 @@ static const unsigned char fwh_m_npk[] = {0x1e, 0xf1, 0xd0, 0xba};
 static const unsigned char fwh_m_chk[] = {'*', '#', '$', '^'};
 static const unsigned char fwh_m_pak[] = {0x13, 0x59, 0x72, 0x32};
 static const unsigned char fwh_m_fdt[] = {0xd0, 0x0d, 0xfe, 0xed};
+static const unsigned char fwh_m_android[] = {'A', 'N', 'D', 'R', 'O', 'I', 'D', '!'};
+static const unsigned char fwh_m_seama[] = {0x5e, 0xa3, 0xa4, 0x17};
 
 static const fwh_magic_t fwh_magic_table[] = {
     {FWH_FMT_UIMAGE, fwh_m_uimage, 4, 0},
@@ -306,6 +308,8 @@ static const fwh_magic_t fwh_magic_table[] = {
     {FWH_FMT_PAK, fwh_m_pak, 4, 0},
     {FWH_FMT_FIT, fwh_m_fdt, 4, 0},
     {FWH_FMT_DTB, fwh_m_fdt, 4, 0},
+    {FWH_FMT_ANDROID, fwh_m_android, 8, 0},
+    {FWH_FMT_SEAMA, fwh_m_seama, 4, 0},
 };
 
 const fwh_magic_t *fwh_magics(size_t *out_count)
@@ -317,7 +321,8 @@ const fwh_magic_t *fwh_magics(size_t *out_count)
 
 static const fwh_parse_fn fwh_parsers[FWH_FMT_COUNT] = {
     NULL,           fwh_parse_uimage, fwh_parse_trx, fwh_parse_fwtool, fwh_parse_safeloader, fwh_parse_hdr1,
-    fwh_parse_npk,  fwh_parse_chk,    fwh_parse_pak, fwh_parse_fit,    fwh_parse_dtb,
+    fwh_parse_npk,  fwh_parse_chk,    fwh_parse_pak, fwh_parse_fit,    fwh_parse_dtb,    fwh_parse_android,
+    fwh_parse_seama,
 };
 
 int fwh_probe(const unsigned char *buf, size_t buf_len, size_t offset, unsigned *out_formats)
@@ -346,6 +351,10 @@ int fwh_probe(const unsigned char *buf, size_t buf_len, size_t offset, unsigned 
         mask |= 1u << FWH_FMT_CHK;
     if (fwh_probe_pak(buf, buf_len, offset))
         mask |= 1u << FWH_FMT_PAK;
+    if (fwh_probe_android(buf, buf_len, offset))
+        mask |= 1u << FWH_FMT_ANDROID;
+    if (fwh_probe_seama(buf, buf_len, offset))
+        mask |= 1u << FWH_FMT_SEAMA;
     fdt = fwh_probe_fdt(buf, buf_len, offset);
     if (fdt)
         mask |= 1u << fdt;
@@ -516,7 +525,7 @@ const char *fwh_strerror(int status)
 const char *fwh_format_name(int format)
 {
     static const char *const names[] = {"none", "uimage", "trx", "fwtool", "safeloader", "hdr1",
-                                        "npk",  "chk",    "pak", "fit",    "dtb"};
+                                        "npk",  "chk",    "pak", "fit",    "dtb",  "android", "seama"};
     return FWH_PICK(names, format);
 }
 

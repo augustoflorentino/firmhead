@@ -41,7 +41,9 @@ extern "C" {
 #define FWH_FMT_PAK 8
 #define FWH_FMT_FIT 9
 #define FWH_FMT_DTB 10
-#define FWH_FMT_COUNT 11
+#define FWH_FMT_ANDROID 11
+#define FWH_FMT_SEAMA 12
+#define FWH_FMT_COUNT 13
 
 #define FWH_ROLE_OTHER 0
 #define FWH_ROLE_KERNEL 1

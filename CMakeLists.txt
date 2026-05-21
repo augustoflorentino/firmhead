@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(firmhead VERSION 0.4.0 DESCRIPTION "Firmware container headers: parse, verify checksums and audit signing" LANGUAGES C)
+project(firmhead VERSION 0.7.0 DESCRIPTION "Firmware container headers: parse, verify checksums and audit signing" LANGUAGES C)
 
 option(FIRMHEAD_BUILD_TESTS "Build tests" OFF)
 option(FIRMHEAD_BUILD_EXAMPLES "Build examples" OFF)
@@ -9,7 +9,7 @@ option(FIRMHEAD_BUILD_BENCH "Build benchmarks" OFF)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-add_library(firmhead src/image.c src/hash.c src/formats.c src/vendor.c src/fdt.c src/audit.c)
+add_library(firmhead src/image.c src/hash.c src/formats.c src/vendor.c src/boot.c src/fdt.c src/audit.c)
 add_library(firmhead::firmhead ALIAS firmhead)
 target_include_directories(firmhead PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -83,7 +83,7 @@ if(FIRMHEAD_BUILD_FUZZ)
     target_link_libraries(fuzz_open PRIVATE firmhead)
     target_link_options(fuzz_open PRIVATE -fsanitize=fuzzer)
     set(format_id 1)
-    foreach(format uimage trx fwtool safeloader hdr1 npk chk pak fit dtb)
+    foreach(format uimage trx fwtool safeloader hdr1 npk chk pak fit dtb android seama)
         add_executable(fuzz_${format} fuzz/fuzz_open.c)
         target_compile_definitions(fuzz_${format} PRIVATE FWH_FUZZ_FORMAT=${format_id})
         target_link_libraries(fuzz_${format} PRIVATE firmhead)

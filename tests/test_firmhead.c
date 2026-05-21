@@ -43,6 +43,9 @@ static const sample_t samples[] = {
     {"fit_external.bin", 0, FWH_FMT_FIT, 2, 1, 0},
     {"fit_ambiguous.bin", 0, FWH_FMT_FIT, 2, 1, 3},
     {"safeloader_salted.bin", 0, FWH_FMT_SAFELOADER, 3, 1, 1},
+    {"android_v0.bin", 0, FWH_FMT_ANDROID, 3, 1, 0},
+    {"android_v2.bin", 0, FWH_FMT_ANDROID, 5, 1, 0},
+    {"seama.bin", 0x30, FWH_FMT_SEAMA, 1, 1, 0},
     {"mkimage/weak-hash.itb", 0, FWH_FMT_FIT, 2, 1, 1},
     {"mkimage/weak-hash.control.dtb", 0, FWH_FMT_DTB, 0, 1, 1},
     {"mkimage/images-only.itb", 0, FWH_FMT_FIT, 2, 1, 1},
@@ -193,9 +196,25 @@ static size_t ok_count(const fwh_image_t *image)
     return n;
 }
 
+static int in_part(const fwh_image_t *image, size_t at)
+{
+    size_t i;
+
+    for (i = 0; i < fwh_part_count(image); i++) {
+        const fwh_part_t *p = fwh_part_get(image, i);
+
+        if (at >= p->offset && at - p->offset < p->size)
+            return 1;
+    }
+    return 0;
+}
+
 static int covered(const fwh_image_t *image, size_t at)
 {
     size_t i;
+
+    if (fwh_image_format(image) == FWH_FMT_ANDROID && !in_part(image, at))
+        return 0;
 
     for (i = 0; i < fwh_checksum_count(image); i++) {
         const fwh_checksum_t *c = fwh_checksum_get(image, i);

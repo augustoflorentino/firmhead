@@ -392,6 +392,21 @@ FWH_INTERNAL int fwh_digest2(const char *algorithm, const unsigned char *a, size
     return FWH_OK;
 }
 
+FWH_INTERNAL int fwh_digest_parts(const char *algorithm, const unsigned char *const *data, const size_t *lens, size_t n,
+                                  unsigned char *out_digest)
+{
+    fwh_hash_t hs;
+    size_t len, i;
+
+    if (fwh_hash_setup(&hs, algorithm, &len) != FWH_OK)
+        return FWH_ERR_ARG;
+    for (i = 0; i < n; i++)
+        fwh_hash_update(&hs, data[i], lens[i]);
+    fwh_hash_pad(&hs, 0);
+    fwh_hash_output(&hs, out_digest, len, 0);
+    return FWH_OK;
+}
+
 int fwh_digest(const char *algorithm, const unsigned char *data, size_t data_len, unsigned char *out_digest,
                size_t *out_digest_len)
 {

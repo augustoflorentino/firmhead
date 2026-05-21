@@ -48,6 +48,8 @@ typedef int (*fwh_parse_fn)(fwh_image_t *image, size_t offset);
 FWH_INTERNAL int fwh_digest2(const char *algorithm, const unsigned char *a, size_t a_len, const unsigned char *b,
                              size_t b_len, unsigned char *out_digest, size_t *out_digest_len);
 
+FWH_INTERNAL int fwh_digest_parts(const char *algorithm, const unsigned char *const *data, const size_t *lens, size_t n,
+                                  unsigned char *out_digest);
 FWH_INTERNAL int fwh_fail(fwh_image_t *image, int status, size_t at);
 FWH_INTERNAL int fwh_has(const fwh_image_t *image, uint64_t offset, uint64_t size);
 FWH_INTERNAL uint32_t fwh_u32be(const unsigned char *p);
@@ -79,6 +81,10 @@ FWH_INTERNAL int fwh_probe_hdr1(const unsigned char *buf, size_t buf_len, size_t
 FWH_INTERNAL int fwh_probe_npk(const unsigned char *buf, size_t buf_len, size_t offset);
 FWH_INTERNAL int fwh_probe_chk(const unsigned char *buf, size_t buf_len, size_t offset);
 FWH_INTERNAL int fwh_probe_pak(const unsigned char *buf, size_t buf_len, size_t offset);
+FWH_INTERNAL int fwh_probe_android(const unsigned char *buf, size_t buf_len, size_t offset);
+FWH_INTERNAL int fwh_probe_seama(const unsigned char *buf, size_t buf_len, size_t offset);
+FWH_INTERNAL int fwh_parse_android(fwh_image_t *image, size_t offset);
+FWH_INTERNAL int fwh_parse_seama(fwh_image_t *image, size_t offset);
 FWH_INTERNAL int fwh_probe_fdt(const unsigned char *buf, size_t buf_len, size_t offset);
 
 FWH_INTERNAL int fwh_parse_uimage(fwh_image_t *image, size_t offset);

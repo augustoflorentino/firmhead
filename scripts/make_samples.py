@@ -85,6 +85,36 @@ def salted_safeloader() -> bytes:
     image[4:20] = hashlib.md5(SALT + bytes(image[0x14:size])).digest()
     return bytes(image)
 
+def pad(data: bytes, page: int) -> bytes:
+    return data + bytes(-len(data) % page)
+
+def android(version: int) -> bytes:
+    page = 2048
+    parts = [bytes(range(256)) * 12, b"ramdisk" * 150, b"second" * 70]
+    if version >= 1:
+        parts.append(b"\xd0\x0d\xfe\xed" + bytes(300))
+    if version >= 2:
+        parts.append(b"\xd0\x0d\xfe\xed" + bytes(500))
+    sha = hashlib.sha1()
+    for part in parts:
+        sha.update(part + struct.pack("<I", len(part)))
+    head = b"ANDROID!" + struct.pack("<10I", len(parts[0]), 0x10008000, len(parts[1]), 0x11000000,
+                                     len(parts[2]), 0x10F00000, 0x10000100, page, version, 0)
+    head += b"board".ljust(16, b"\0") + b"console=ttyS0".ljust(512, b"\0") + sha.digest().ljust(32, b"\0")
+    head += bytes(1024)
+    if version >= 1:
+        head += struct.pack("<IQI", len(parts[3]), page + sum(len(pad(p, page)) for p in parts[:3]), 1660)
+    if version >= 2:
+        head += struct.pack("<IQ", len(parts[4]), 0x11F00000)
+    return b"".join(pad(p, page) for p in [head] + parts)
+
+def seama() -> bytes:
+    payload = b"\x27\x05\x19\x56" + b"payload" * 200
+    meta = b"dev=/dev/mtdblock/5\0type=firmware\0\0\0"
+    envelope = b"signature=wrgac65_dlink.2015_dir842\0"
+    image = struct.pack(">IHHI", 0x5EA3A417, 0, len(meta), len(payload)) + hashlib.md5(payload).digest() + meta
+    return struct.pack(">IHHI", 0x5EA3A417, 0, len(envelope), 0) + envelope + image + payload
+
 SAMPLES = {
     "fwtool_signed.bin": sysupgrade,
     "fwtool_placeholder.bin": placeholder,
@@ -93,6 +123,9 @@ SAMPLES = {
     "fit_external.bin": external_fit,
     "fit_ambiguous.bin": ambiguous_fit,
     "safeloader_salted.bin": salted_safeloader,
+    "android_v0.bin": lambda: android(0),
+    "android_v2.bin": lambda: android(2),
+    "seama.bin": seama,
 }
 
 def main() -> None:
