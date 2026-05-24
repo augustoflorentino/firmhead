@@ -97,7 +97,7 @@ static void bench_open(unsigned char *buf, size_t len)
     for (r = 0; r < 5; r++) {
         double start = now();
 
-        if (fwh_open(buf, len, 0, FWH_FMT_NONE, NULL, NULL, NULL, &image, &error_at) != FWH_OK)
+        if (fwh_open(buf, len, 0, FWH_FMT_NONE, NULL, &image, &error_at) != FWH_OK)
             return;
         fwh_audit(image);
         if (now() - start < best)

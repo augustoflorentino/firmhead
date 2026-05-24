@@ -73,12 +73,23 @@ extern "C" {
 #define FWH_FIND_OPTIONAL_KEYS 4
 #define FWH_FIND_AMBIGUOUS_NODE 5
 
+#define FWH_VERSION_MAJOR 1
+#define FWH_VERSION_MINOR 0
+#define FWH_VERSION_PATCH 0
+#define FWH_VERSION_STRING "1.0.0"
+
 #define FWH_DIGEST_MAX 64
 
 typedef struct fwh_image fwh_image_t;
 
 typedef void *(*fwh_alloc_fn)(void *ctx, size_t size);
 typedef void (*fwh_free_fn)(void *ctx, void *ptr);
+
+typedef struct fwh_allocator {
+    fwh_alloc_fn alloc;
+    fwh_free_fn free;
+    void *ctx;
+} fwh_allocator_t;
 
 typedef struct fwh_part {
     const char *name;
@@ -148,8 +159,7 @@ typedef struct fwh_magic {
 FWH_API const fwh_magic_t *fwh_magics(size_t *out_count);
 FWH_API int fwh_probe(const unsigned char *buf, size_t buf_len, size_t offset, unsigned *out_formats);
 FWH_API int fwh_open(const unsigned char *buf, size_t buf_len, size_t offset, int format,
-                     fwh_alloc_fn alloc_fn, fwh_free_fn free_fn, void *alloc_ctx, fwh_image_t **out_image,
-                     size_t *out_error_at);
+                     const fwh_allocator_t *allocator, fwh_image_t **out_image, size_t *out_error_at);
 FWH_API void fwh_image_destroy(fwh_image_t *image);
 FWH_API int fwh_image_format(const fwh_image_t *image);
 FWH_API uint64_t fwh_image_offset(const fwh_image_t *image);
@@ -178,6 +188,7 @@ FWH_API int fwh_digest(const char *algorithm, const unsigned char *data, size_t 
                        unsigned char *out_digest, size_t *out_digest_len);
 FWH_API uint32_t fwh_netgear_sum(const unsigned char *data, size_t data_len);
 
+FWH_API const char *fwh_version(void);
 FWH_API const char *fwh_strerror(int status);
 FWH_API const char *fwh_format_name(int format);
 FWH_API const char *fwh_role_name(int role);

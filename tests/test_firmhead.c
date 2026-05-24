@@ -152,7 +152,7 @@ static void test_sample(const sample_t *s, const unsigned char *buf, size_t len)
 
     EXPECT(fwh_probe(buf, len, s->offset, &formats) == FWH_OK);
     EXPECT(formats & (1u << s->format));
-    EXPECT(fwh_open(buf, len, s->offset, FWH_FMT_NONE, NULL, NULL, NULL, &image, &error_at) == FWH_OK);
+    EXPECT(fwh_open(buf, len, s->offset, FWH_FMT_NONE, NULL, &image, &error_at) == FWH_OK);
     if (image == NULL)
         return;
     EXPECT(fwh_image_format(image) == s->format);
@@ -176,7 +176,7 @@ static void test_truncation(const sample_t *s, const unsigned char *buf, size_t 
             return;
         memcpy(copy, buf, cut);
         image = NULL;
-        status = fwh_open(copy, cut, s->offset, s->format, NULL, NULL, NULL, &image, &error_at);
+        status = fwh_open(copy, cut, s->offset, s->format, NULL, &image, &error_at);
         EXPECT(status == FWH_OK || image == NULL);
         if (status == FWH_OK) {
             EXPECT(fwh_image_offset(image) + fwh_image_size(image) <= cut);
@@ -231,7 +231,7 @@ static void test_tamper(const sample_t *s, const unsigned char *buf, size_t len)
     unsigned char *copy = malloc(len);
     fwh_image_t *original = NULL, *image;
 
-    if (copy == NULL || fwh_open(buf, len, s->offset, s->format, NULL, NULL, NULL, &original, &error_at) != FWH_OK)
+    if (copy == NULL || fwh_open(buf, len, s->offset, s->format, NULL, &original, &error_at) != FWH_OK)
         goto done;
     for (i = 0; i < len; i += step) {
         if (!covered(original, i))
@@ -239,7 +239,7 @@ static void test_tamper(const sample_t *s, const unsigned char *buf, size_t len)
         memcpy(copy, buf, len);
         copy[i] ^= 0x01;
         image = NULL;
-        if (fwh_open(copy, len, s->offset, s->format, NULL, NULL, NULL, &image, &error_at) == FWH_OK &&
+        if (fwh_open(copy, len, s->offset, s->format, NULL, &image, &error_at) == FWH_OK &&
             ok_count(image) == ok_count(original)) {
             fprintf(stderr, "%s: flip at 0x%zx not detected\n", s->file, i);
             failures++;
@@ -275,14 +275,18 @@ static void limited_free(void *ctx, void *ptr)
 static void test_alloc_failure(const sample_t *s, const unsigned char *buf, size_t len)
 {
     budget_t budget;
+    fwh_allocator_t allocator;
     fwh_image_t *image;
     size_t error_at;
     int status;
 
+    allocator.alloc = limited_alloc;
+    allocator.free = limited_free;
+    allocator.ctx = &budget;
     for (budget.allowed = 0; budget.allowed < 10000; budget.allowed++) {
         budget.used = 0;
         image = NULL;
-        status = fwh_open(buf, len, s->offset, s->format, limited_alloc, limited_free, &budget, &image, &error_at);
+        status = fwh_open(buf, len, s->offset, s->format, &allocator, &image, &error_at);
         if (status == FWH_OK) {
             status = fwh_audit(image);
             if (status == FWH_ERR_NOMEM) {
@@ -306,11 +310,12 @@ static void test_arguments(void)
     size_t error_at;
     unsigned char zero[64] = {0};
 
-    EXPECT(fwh_open(NULL, 10, 0, FWH_FMT_NONE, NULL, NULL, NULL, &image, &error_at) == FWH_ERR_ARG);
-    EXPECT(fwh_open(zero, sizeof(zero), 0, FWH_FMT_NONE, NULL, NULL, NULL, &image, &error_at) == FWH_ERR_FORMAT);
+    EXPECT(fwh_open(NULL, 10, 0, FWH_FMT_NONE, NULL, &image, &error_at) == FWH_ERR_ARG);
+    EXPECT(fwh_open(zero, sizeof(zero), 0, FWH_FMT_NONE, NULL, &image, &error_at) == FWH_ERR_FORMAT);
     EXPECT(image == NULL);
-    EXPECT(fwh_open(zero, sizeof(zero), 65, FWH_FMT_NONE, NULL, NULL, NULL, &image, &error_at) == FWH_ERR_TRUNCATED);
-    EXPECT(fwh_open(zero, sizeof(zero), 0, 99, NULL, NULL, NULL, &image, &error_at) == FWH_ERR_ARG);
+    EXPECT(fwh_open(zero, sizeof(zero), 65, FWH_FMT_NONE, NULL, &image, &error_at) == FWH_ERR_TRUNCATED);
+    EXPECT(fwh_open(zero, sizeof(zero), 0, 99, NULL, &image, &error_at) == FWH_ERR_ARG);
+    EXPECT(strcmp(fwh_version(), FWH_VERSION_STRING) == 0);
     EXPECT(fwh_probe(zero, sizeof(zero), 0, &formats) == FWH_OK && formats == 0);
     EXPECT(fwh_audit(NULL) == FWH_ERR_ARG);
     fwh_image_destroy(NULL);
@@ -326,7 +331,7 @@ static void test_signature_regions(void)
     fwh_image_t *image = NULL;
     const fwh_signature_t *s;
 
-    if (buf == NULL || fwh_open(buf, len, len - 16, FWH_FMT_FWTOOL, NULL, NULL, NULL, &image, &error_at) != FWH_OK ||
+    if (buf == NULL || fwh_open(buf, len, len - 16, FWH_FMT_FWTOOL, NULL, &image, &error_at) != FWH_OK ||
         fwh_signature_count(image) != 1) {
         failures++;
     } else {

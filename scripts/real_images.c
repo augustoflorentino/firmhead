@@ -40,7 +40,7 @@ static size_t find(const unsigned char *buf, size_t len, hit_t *hits, size_t max
             continue;
         for (fmt = 1; fmt < FWH_FMT_COUNT && n < max; fmt++) {
             image = NULL;
-            if ((formats & (1u << fmt)) && fwh_open(buf, len, off, fmt, NULL, NULL, NULL, &image, &err) == FWH_OK) {
+            if ((formats & (1u << fmt)) && fwh_open(buf, len, off, fmt, NULL, &image, &err) == FWH_OK) {
                 hits[n].offset = off;
                 hits[n++].format = fmt;
             }
@@ -56,7 +56,7 @@ static int state_of(const unsigned char *buf, size_t len, hit_t h, size_t index)
     size_t err;
     int state = -1;
 
-    if (fwh_open(buf, len, h.offset, h.format, NULL, NULL, NULL, &image, &err) == FWH_OK &&
+    if (fwh_open(buf, len, h.offset, h.format, NULL, &image, &err) == FWH_OK &&
         index < fwh_checksum_count(image))
         state = fwh_checksum_get(image, index)->state;
     fwh_image_destroy(image);
@@ -68,7 +68,7 @@ static size_t ok_count(const unsigned char *buf, size_t len, hit_t h, fwh_image_
     fwh_image_t *image = NULL;
     size_t err, i, n = 0;
 
-    if (fwh_open(buf, len, h.offset, h.format, NULL, NULL, NULL, &image, &err) == FWH_OK)
+    if (fwh_open(buf, len, h.offset, h.format, NULL, &image, &err) == FWH_OK)
         for (i = 0; i < fwh_checksum_count(image); i++)
             n += fwh_checksum_get(image, i)->state == FWH_CHECK_OK;
     if (keep)
@@ -153,7 +153,7 @@ static void truncate_all(const unsigned char *buf, size_t len, hit_t h)
 
         memcpy(start, buf, cut);
         image = NULL;
-        if (fwh_open(start, cut, h.offset, h.format, NULL, NULL, NULL, &image, &err) == FWH_OK)
+        if (fwh_open(start, cut, h.offset, h.format, NULL, &image, &err) == FWH_OK)
             fwh_audit(image);
         fwh_image_destroy(image);
     }

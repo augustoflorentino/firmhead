@@ -18,7 +18,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     for (format = 0; format < FWH_FMT_COUNT; format++) {
 #endif
         image = NULL;
-        if (fwh_open(data, size, 0, format, NULL, NULL, NULL, &image, &error_at) != FWH_OK)
+        if (fwh_open(data, size, 0, format, NULL, &image, &error_at) != FWH_OK)
             continue;
         fwh_audit(image);
         for (i = 0; i < fwh_part_count(image); i++)

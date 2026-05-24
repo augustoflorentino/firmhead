@@ -65,7 +65,7 @@ static void open_all(const unsigned char *buf, size_t len)
     for (offset = 0; offset < len; offset = offset == 63 && len > 128 ? len - 64 : offset + 1)
         for (format = 1; format < FWH_FMT_COUNT; format++) {
             image = NULL;
-            if (fwh_open(buf, len, offset, format, NULL, NULL, NULL, &image, &error_at) == FWH_OK)
+            if (fwh_open(buf, len, offset, format, NULL, &image, &error_at) == FWH_OK)
                 fwh_audit(image);
             fwh_image_destroy(image);
         }
@@ -284,11 +284,15 @@ static void test_adversarial_fit(void)
     size_t len, error_at;
     unsigned char *fit = adversarial_fit(&len, 65536);
     counter_t counter = {0, 0, 0};
+    fwh_allocator_t allocator;
     fwh_image_t *image = NULL;
     double start = seconds(), elapsed;
     int status;
 
-    status = fwh_open(fit, len, 0, FWH_FMT_FIT, count_alloc, count_free, &counter, &image, &error_at);
+    allocator.alloc = count_alloc;
+    allocator.free = count_free;
+    allocator.ctx = &counter;
+    status = fwh_open(fit, len, 0, FWH_FMT_FIT, &allocator, &image, &error_at);
     if (status == FWH_OK)
         fwh_audit(image);
     fwh_image_destroy(image);
@@ -304,10 +308,14 @@ static void test_adversarial_fit(void)
 static size_t calls_for(const unsigned char *buf, size_t len)
 {
     counter_t counter = {0, 0, 0};
+    fwh_allocator_t allocator;
     fwh_image_t *image = NULL;
     size_t error_at;
 
-    if (fwh_open(buf, len, 0, FWH_FMT_NONE, count_alloc, count_free, &counter, &image, &error_at) == FWH_OK)
+    allocator.alloc = count_alloc;
+    allocator.free = count_free;
+    allocator.ctx = &counter;
+    if (fwh_open(buf, len, 0, FWH_FMT_NONE, &allocator, &image, &error_at) == FWH_OK)
         fwh_audit(image);
     fwh_image_destroy(image);
     return counter.calls;

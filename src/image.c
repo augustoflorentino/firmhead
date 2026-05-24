@@ -399,9 +399,12 @@ static int fwh_pick_format(const unsigned char *buf, size_t buf_len, size_t offs
     return FWH_FMT_NONE;
 }
 
-int fwh_open(const unsigned char *buf, size_t buf_len, size_t offset, int format, fwh_alloc_fn alloc_fn,
-             fwh_free_fn free_fn, void *alloc_ctx, fwh_image_t **out_image, size_t *out_error_at)
+int fwh_open(const unsigned char *buf, size_t buf_len, size_t offset, int format, const fwh_allocator_t *allocator,
+             fwh_image_t **out_image, size_t *out_error_at)
 {
+    fwh_alloc_fn alloc_fn = allocator ? allocator->alloc : NULL;
+    fwh_free_fn free_fn = allocator ? allocator->free : NULL;
+    void *alloc_ctx = allocator ? allocator->ctx : NULL;
     fwh_image_t *image;
     int status;
 
@@ -520,6 +523,11 @@ const char *fwh_strerror(int status)
                                         "damaged header: its own checksum fails",
                                         "limit reached: the input exceeds a fixed bound"};
     return FWH_PICK(names, status);
+}
+
+const char *fwh_version(void)
+{
+    return FWH_VERSION_STRING;
 }
 
 const char *fwh_format_name(int format)

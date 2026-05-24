@@ -59,13 +59,14 @@ Conventions:
 - every function that can fail returns `FWH_OK` or an error code; `fwh_strerror` describes it
 - what `fwh_open` returns is released only by `fwh_image_destroy`, which accepts `NULL`
 - functions never take ownership of their arguments; returned pointers belong to the library
-- pass your own allocator to `fwh_open`, or `NULL` for `malloc`/`free`
+- pass a `fwh_allocator_t` to `fwh_open`, or `NULL` for `malloc`/`free`
 - the image borrows the buffer: keep it alive and unchanged until `fwh_image_destroy`
 
 ## Versioning
 
 Semantic Versioning. Compatible releases bump the minor version; incompatible ones bump the
-major version and the soname. See [CHANGELOG.md](CHANGELOG.md).
+major version and the soname. `FWH_VERSION_STRING` gives the version compiled against and
+`fwh_version()` the one linked at run time. See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

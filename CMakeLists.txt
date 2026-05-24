@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
-project(firmhead VERSION 0.7.0 DESCRIPTION "Firmware container headers: parse, verify checksums and audit signing" LANGUAGES C)
+file(STRINGS include/firmhead/firmhead.h FIRMHEAD_VERSION REGEX "^#define FWH_VERSION_STRING ")
+string(REGEX REPLACE ".*\"(.*)\"" "\\1" FIRMHEAD_VERSION "${FIRMHEAD_VERSION}")
+project(firmhead VERSION ${FIRMHEAD_VERSION} DESCRIPTION "Firmware container headers: parse, verify checksums and audit signing" LANGUAGES C)
 
 option(FIRMHEAD_BUILD_TESTS "Build tests" OFF)
 option(FIRMHEAD_BUILD_EXAMPLES "Build examples" OFF)

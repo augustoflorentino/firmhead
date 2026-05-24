@@ -93,7 +93,7 @@ static void scan(const unsigned char *buf, size_t len)
     for (offset = 0; offset < len; offset++) {
         if (fwh_probe(buf, len, offset, &formats) != FWH_OK || formats == 0)
             continue;
-        status = fwh_open(buf, len, offset, FWH_FMT_NONE, NULL, NULL, NULL, &image, &error_at);
+        status = fwh_open(buf, len, offset, FWH_FMT_NONE, NULL, &image, &error_at);
         if (status != FWH_OK) {
             printf("0x%zx: %s at 0x%zx\n", offset, fwh_strerror(status), error_at);
             continue;

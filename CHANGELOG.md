@@ -4,6 +4,34 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 1.0.0 - 2026-05-24
+
+The API is now stable: it changes incompatibly only with a new major version and soname.
+
+### Changed
+
+- `fwh_open` takes the allocator as one `const fwh_allocator_t *` (`alloc`, `free`, `ctx`)
+  instead of three separate arguments. `NULL` still means `malloc` and `free`.
+- The shared library is now `libfirmhead.so.1`.
+
+### Added
+
+- `FWH_VERSION_MAJOR`, `FWH_VERSION_MINOR`, `FWH_VERSION_PATCH`, `FWH_VERSION_STRING` and
+  `fwh_version()`. The CMake project version is read from the header.
+
+### Upgrading
+
+- Replace `fwh_open(buf, len, offset, format, NULL, NULL, NULL, &image, &at)` with
+  `fwh_open(buf, len, offset, format, NULL, &image, &at)`.
+- With a custom allocator, fill a `fwh_allocator_t` and pass its address:
+
+  ```c
+  fwh_allocator_t allocator = {my_alloc, my_free, my_ctx};
+  fwh_open(buf, len, offset, format, &allocator, &image, &at);
+  ```
+
+- Relink against `libfirmhead.so.1`; binaries built against 0.x will not load it.
+
 ## 0.7.0 - 2026-05-21
 
 ### Added
