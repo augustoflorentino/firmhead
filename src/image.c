@@ -327,9 +327,9 @@ static const fwh_parse_fn fwh_parsers[FWH_FMT_COUNT] = {
     fwh_parse_seama, fwh_parse_tplink,
 };
 
-int fwh_probe(const unsigned char *buf, size_t buf_len, size_t offset, unsigned *out_formats)
+int fwh_probe(const unsigned char *buf, size_t buf_len, size_t offset, uint64_t *out_formats)
 {
-    unsigned mask = 0;
+    uint64_t mask = 0;
     int fdt;
 
     if (out_formats == NULL || (buf == NULL && buf_len))
@@ -338,30 +338,30 @@ int fwh_probe(const unsigned char *buf, size_t buf_len, size_t offset, unsigned 
     if (offset >= buf_len)
         return FWH_OK;
     if (fwh_probe_uimage(buf, buf_len, offset))
-        mask |= 1u << FWH_FMT_UIMAGE;
+        mask |= FWH_FMT_BIT(FWH_FMT_UIMAGE);
     if (fwh_probe_trx(buf, buf_len, offset))
-        mask |= 1u << FWH_FMT_TRX;
+        mask |= FWH_FMT_BIT(FWH_FMT_TRX);
     if (fwh_probe_fwtool(buf, buf_len, offset))
-        mask |= 1u << FWH_FMT_FWTOOL;
+        mask |= FWH_FMT_BIT(FWH_FMT_FWTOOL);
     if (fwh_probe_safeloader(buf, buf_len, offset))
-        mask |= 1u << FWH_FMT_SAFELOADER;
+        mask |= FWH_FMT_BIT(FWH_FMT_SAFELOADER);
     if (fwh_probe_hdr1(buf, buf_len, offset))
-        mask |= 1u << FWH_FMT_HDR1;
+        mask |= FWH_FMT_BIT(FWH_FMT_HDR1);
     if (fwh_probe_npk(buf, buf_len, offset))
-        mask |= 1u << FWH_FMT_NPK;
+        mask |= FWH_FMT_BIT(FWH_FMT_NPK);
     if (fwh_probe_chk(buf, buf_len, offset))
-        mask |= 1u << FWH_FMT_CHK;
+        mask |= FWH_FMT_BIT(FWH_FMT_CHK);
     if (fwh_probe_pak(buf, buf_len, offset))
-        mask |= 1u << FWH_FMT_PAK;
+        mask |= FWH_FMT_BIT(FWH_FMT_PAK);
     if (fwh_probe_android(buf, buf_len, offset))
-        mask |= 1u << FWH_FMT_ANDROID;
+        mask |= FWH_FMT_BIT(FWH_FMT_ANDROID);
     if (fwh_probe_seama(buf, buf_len, offset))
-        mask |= 1u << FWH_FMT_SEAMA;
+        mask |= FWH_FMT_BIT(FWH_FMT_SEAMA);
     if (fwh_probe_tplink(buf, buf_len, offset))
-        mask |= 1u << FWH_FMT_TPLINK;
+        mask |= FWH_FMT_BIT(FWH_FMT_TPLINK);
     fdt = fwh_probe_fdt(buf, buf_len, offset);
     if (fdt)
-        mask |= 1u << fdt;
+        mask |= FWH_FMT_BIT(fdt);
     *out_formats = mask;
     return FWH_OK;
 }
@@ -393,12 +393,12 @@ void fwh_image_destroy(fwh_image_t *image)
 
 static int fwh_pick_format(const unsigned char *buf, size_t buf_len, size_t offset)
 {
-    unsigned mask = 0;
+    uint64_t mask = 0;
     int format;
 
     fwh_probe(buf, buf_len, offset, &mask);
     for (format = 1; format < FWH_FMT_COUNT; format++)
-        if (mask & (1u << format))
+        if (mask & FWH_FMT_BIT(format))
             return format;
     return FWH_FMT_NONE;
 }

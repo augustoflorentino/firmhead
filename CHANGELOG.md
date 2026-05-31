@@ -4,6 +4,33 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 2.0.0 - 2026-05-31
+
+### Changed
+
+- `fwh_probe` reports the matching formats in a `uint64_t` mask instead of `unsigned`. With 14
+  formats the 32-bit mask was already half used, and on platforms where `unsigned` is 16 bits it
+  could not hold them at all.
+- The shared library is now `libfirmhead.so.2`.
+
+### Added
+
+- `FWH_FMT_BIT(format)` builds the mask bit for a format.
+
+### Upgrading
+
+- Declare the probe result as `uint64_t` and test it with `FWH_FMT_BIT`:
+
+  ```c
+  uint64_t formats;
+
+  fwh_probe(buf, len, offset, &formats);
+  if (formats & FWH_FMT_BIT(FWH_FMT_FIT))
+      ...
+  ```
+
+- Relink against `libfirmhead.so.2`.
+
 ## 1.5.0 - 2026-05-31
 
 ### Added

@@ -35,7 +35,7 @@ static void fill(unsigned char *buf, size_t len)
 static void bench_probe(const unsigned char *buf, size_t len)
 {
     double runs[31];
-    unsigned formats, sink = 0;
+    uint64_t formats, sink = 0;
     size_t r, i, n = 1u << 20;
 
     for (r = 0; r < 31; r++) {
@@ -48,7 +48,7 @@ static void bench_probe(const unsigned char *buf, size_t len)
         runs[r] = (now() - start) / (double)n * 1e9;
     }
     qsort(runs, 31, sizeof(double), compare);
-    printf("probe       %8.1f ns median (sink %u)\n", runs[15], sink);
+    printf("probe       %8.1f ns median (sink %llu)\n", runs[15], (unsigned long long)sink);
 }
 
 static void bench_digest(const char *algo, const unsigned char *buf, size_t len)

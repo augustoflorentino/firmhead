@@ -31,7 +31,7 @@ static unsigned char *load(const char *path, size_t *len)
 static size_t find(const unsigned char *buf, size_t len, hit_t *hits, size_t max)
 {
     size_t off, n = 0, err;
-    unsigned formats;
+    uint64_t formats;
     int fmt;
     fwh_image_t *image;
 
@@ -40,7 +40,7 @@ static size_t find(const unsigned char *buf, size_t len, hit_t *hits, size_t max
             continue;
         for (fmt = 1; fmt < FWH_FMT_COUNT && n < max; fmt++) {
             image = NULL;
-            if ((formats & (1u << fmt)) && fwh_open(buf, len, off, fmt, NULL, &image, &err) == FWH_OK) {
+            if ((formats & FWH_FMT_BIT(fmt)) && fwh_open(buf, len, off, fmt, NULL, &image, &err) == FWH_OK) {
                 hits[n].offset = off;
                 hits[n++].format = fmt;
             }

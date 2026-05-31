@@ -149,10 +149,10 @@ static void test_sample(const sample_t *s, const unsigned char *buf, size_t len)
 {
     fwh_image_t *image = NULL;
     size_t error_at = 0;
-    unsigned formats = 0;
+    uint64_t formats = 0;
 
     EXPECT(fwh_probe(buf, len, s->offset, &formats) == FWH_OK);
-    EXPECT(formats & (1u << s->format));
+    EXPECT(formats & FWH_FMT_BIT(s->format));
     EXPECT(fwh_open(buf, len, s->offset, FWH_FMT_NONE, NULL, &image, &error_at) == FWH_OK);
     if (image == NULL)
         return;
@@ -307,7 +307,7 @@ static void test_alloc_failure(const sample_t *s, const unsigned char *buf, size
 static void test_arguments(void)
 {
     fwh_image_t *image = (fwh_image_t *)&image;
-    unsigned formats;
+    uint64_t formats;
     size_t error_at;
     unsigned char zero[64] = {0};
 

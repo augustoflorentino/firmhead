@@ -76,7 +76,7 @@ static void test_guard_page(void)
 {
     size_t page = (size_t)sysconf(_SC_PAGESIZE), i, len, cut, limit, span;
     unsigned char *buf, *map;
-    unsigned formats;
+    uint64_t formats;
 
     for (i = 0; i < sizeof(files) / sizeof(files[0]); i++) {
         if ((buf = load(files[i], &len)) == NULL) {

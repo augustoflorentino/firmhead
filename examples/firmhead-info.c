@@ -199,7 +199,7 @@ static void scan(const unsigned char *buf, size_t len, int json)
 {
     size_t found = 0;
     size_t offset, error_at;
-    unsigned formats;
+    uint64_t formats;
     fwh_image_t *image;
     int status;
 

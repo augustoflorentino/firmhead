@@ -7,7 +7,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     fwh_image_t *image;
     size_t error_at, i;
-    unsigned formats;
+    uint64_t formats;
     int format;
 
     if (fwh_probe(data, size, 0, &formats) != FWH_OK)

@@ -45,6 +45,7 @@ extern "C" {
 #define FWH_FMT_SEAMA 12
 #define FWH_FMT_TPLINK 13
 #define FWH_FMT_COUNT 14
+#define FWH_FMT_BIT(format) ((uint64_t)1 << (format))
 
 #define FWH_ROLE_OTHER 0
 #define FWH_ROLE_KERNEL 1
@@ -74,10 +75,10 @@ extern "C" {
 #define FWH_FIND_OPTIONAL_KEYS 4
 #define FWH_FIND_AMBIGUOUS_NODE 5
 
-#define FWH_VERSION_MAJOR 1
-#define FWH_VERSION_MINOR 5
+#define FWH_VERSION_MAJOR 2
+#define FWH_VERSION_MINOR 0
 #define FWH_VERSION_PATCH 0
-#define FWH_VERSION_STRING "1.5.0"
+#define FWH_VERSION_STRING "2.0.0"
 
 #define FWH_DIGEST_MAX 64
 
@@ -158,7 +159,7 @@ typedef struct fwh_magic {
 } fwh_magic_t;
 
 FWH_API const fwh_magic_t *fwh_magics(size_t *out_count);
-FWH_API int fwh_probe(const unsigned char *buf, size_t buf_len, size_t offset, unsigned *out_formats);
+FWH_API int fwh_probe(const unsigned char *buf, size_t buf_len, size_t offset, uint64_t *out_formats);
 FWH_API int fwh_open(const unsigned char *buf, size_t buf_len, size_t offset, int format,
                      const fwh_allocator_t *allocator, fwh_image_t **out_image, size_t *out_error_at);
 FWH_API void fwh_image_destroy(fwh_image_t *image);

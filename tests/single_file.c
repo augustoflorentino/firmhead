@@ -4,7 +4,7 @@
 int main(void)
 {
     static const unsigned char header[64] = {0x27, 0x05, 0x19, 0x56};
-    unsigned formats = 1;
+    uint64_t formats = 1;
     fwh_image_t *image = NULL;
     size_t error_at = 0;
     int status = fwh_probe(header, sizeof(header), 0, &formats);
