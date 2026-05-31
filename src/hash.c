@@ -397,13 +397,15 @@ FWH_INTERNAL int fwh_digest_parts(const char *algorithm, const unsigned char *co
 {
     fwh_hash_t hs;
     size_t len, i;
+    int little_endian;
 
     if (fwh_hash_setup(&hs, algorithm, &len) != FWH_OK)
         return FWH_ERR_ARG;
+    little_endian = strcmp(algorithm, "md5") == 0;
     for (i = 0; i < n; i++)
         fwh_hash_update(&hs, data[i], lens[i]);
-    fwh_hash_pad(&hs, 0);
-    fwh_hash_output(&hs, out_digest, len, 0);
+    fwh_hash_pad(&hs, little_endian);
+    fwh_hash_output(&hs, out_digest, len, little_endian);
     return FWH_OK;
 }
 

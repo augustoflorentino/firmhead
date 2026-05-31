@@ -1,7 +1,7 @@
 # firmhead
 
 Reads the container headers that wrap router and embedded firmware, from an in-memory buffer:
-uImage (legacy, including multi-file), TRX v1/v2, OpenWrt fwtool trailers, TP-Link safeloader,
+uImage (legacy, including multi-file), TRX v1/v2, OpenWrt fwtool trailers, TP-Link v1 and safeloader,
 Xiaomi HDR1, MikroTik NPK, Netgear CHK, Reolink PAK, D-Link SEAMA, Android boot images
 (header v0 to v4), U-Boot FIT and plain device trees.
 

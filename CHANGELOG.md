@@ -4,6 +4,21 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 1.2.0 - 2026-05-31
+
+### Added
+
+- TP-Link v1 factory images (`FWH_FMT_TPLINK`): vendor, version, hardware id, load and entry
+  addresses as metadata, kernel, rootfs and bootloader as parts, and the salted MD5 over the
+  whole image, with both the firmware and the bootloader salt. Tested on the OpenWrt factory
+  images for the Archer C5 v1, Archer C7 v2 and TL-WDR4300 v1.
+- `FWH_FMT_COUNT` is now 14; existing format numbers are unchanged.
+
+### Fixed
+
+- The internal multi-buffer digest used by the Android boot id produced big-endian MD5 output;
+  it now matches `fwh_digest`. No released parser used MD5 through it.
+
 ## 1.0.0 - 2026-05-24
 
 The API is now stable: it changes incompatibly only with a new major version and soname.

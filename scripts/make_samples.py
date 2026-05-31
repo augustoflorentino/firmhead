@@ -115,6 +115,22 @@ def seama() -> bytes:
     image = struct.pack(">IHHI", 0x5EA3A417, 0, len(meta), len(payload)) + hashlib.md5(payload).digest() + meta
     return struct.pack(">IHHI", 0x5EA3A417, 0, len(envelope), 0) + envelope + image + payload
 
+def tplink_v1() -> bytes:
+    kernel, rootfs = b"\x5d\x00\x00\x80" + b"kernel" * 300, b"hsqs" + b"rootfs" * 400
+    total = 0x200 + len(kernel) + len(rootfs) + 0x100
+    head = bytearray(0x200)
+    struct.pack_into(">I", head, 0, 0x01000000)
+    head[4:12] = b"OpenWrt\0"
+    head[0x1C:0x2D] = b"r33311-981c978eff"
+    struct.pack_into(">III", head, 0x40, 0xC7000002, 1, 0)
+    struct.pack_into(">IIIIIIIII", head, 0x74, 0x80060000, 0x80060000, total, 0x200, len(kernel),
+                     0x200 + len(kernel), len(rootfs), 0, 0)
+    salt = bytes.fromhex("dcd73aa5c39598fbddf9e7f40eae4738")
+    image = bytearray(head + kernel + rootfs + b"\xff" * 0x100)
+    image[0x4C:0x5C] = salt
+    image[0x4C:0x5C] = hashlib.md5(image).digest()
+    return bytes(image)
+
 SAMPLES = {
     "fwtool_signed.bin": sysupgrade,
     "fwtool_placeholder.bin": placeholder,
@@ -126,6 +142,7 @@ SAMPLES = {
     "android_v0.bin": lambda: android(0),
     "android_v2.bin": lambda: android(2),
     "seama.bin": seama,
+    "tplink_v1.bin": tplink_v1,
 }
 
 def main() -> None:
