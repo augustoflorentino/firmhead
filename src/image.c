@@ -495,6 +495,21 @@ FWH_ACCESSORS(key, fwh_key_t, keys)
 FWH_ACCESSORS(config, fwh_config_t, configs)
 FWH_ACCESSORS(finding, fwh_finding_t, findings)
 
+const fwh_part_t *fwh_part_find(const fwh_image_t *image, const char *name)
+{
+    size_t i;
+
+    if (image == NULL || name == NULL)
+        return NULL;
+    for (i = 0; i < image->parts.count; i++) {
+        const fwh_part_t *part = (const fwh_part_t *)image->parts.items + i;
+
+        if (strcmp(part->name, name) == 0)
+            return part;
+    }
+    return NULL;
+}
+
 const char *fwh_meta_find(const fwh_image_t *image, const char *key)
 {
     size_t i;

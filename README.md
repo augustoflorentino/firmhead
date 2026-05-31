@@ -51,8 +51,8 @@ Define `FWH_STATIC` as well to keep every function private to that file.
 ## Usage
 
 See [`examples/firmhead-info.c`](examples/firmhead-info.c), a small tool that scans a file and prints
-every header it finds. The header `include/firmhead/firmhead.h` is the
-API reference.
+every header it finds (`-j` prints one JSON object per file instead). The header
+`include/firmhead/firmhead.h` is the API reference.
 
 Conventions:
 

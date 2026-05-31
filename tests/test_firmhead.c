@@ -347,6 +347,20 @@ static void test_signature_regions(void)
     free(buf);
 }
 
+static void test_part_find(void)
+{
+    size_t len, error_at;
+    unsigned char *buf = load("android_v2.bin", &len);
+    fwh_image_t *image = NULL;
+
+    EXPECT(buf != NULL && fwh_open(buf, len, 0, FWH_FMT_NONE, NULL, &image, &error_at) == FWH_OK);
+    EXPECT(fwh_part_find(image, "dtb") == fwh_part_get(image, 4));
+    EXPECT(fwh_part_find(image, "missing") == NULL);
+    EXPECT(fwh_part_find(NULL, "dtb") == NULL);
+    fwh_image_destroy(image);
+    free(buf);
+}
+
 int main(void)
 {
     size_t i, len;
@@ -355,6 +369,7 @@ int main(void)
     test_vectors();
     test_arguments();
     test_signature_regions();
+    test_part_find();
     for (i = 0; i < sizeof(samples) / sizeof(samples[0]); i++) {
         if ((buf = load(samples[i].file, &len)) == NULL) {
             fprintf(stderr, "missing %s\n", samples[i].file);

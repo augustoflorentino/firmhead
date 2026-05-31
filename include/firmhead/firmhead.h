@@ -75,9 +75,9 @@ extern "C" {
 #define FWH_FIND_AMBIGUOUS_NODE 5
 
 #define FWH_VERSION_MAJOR 1
-#define FWH_VERSION_MINOR 2
+#define FWH_VERSION_MINOR 5
 #define FWH_VERSION_PATCH 0
-#define FWH_VERSION_STRING "1.2.0"
+#define FWH_VERSION_STRING "1.5.0"
 
 #define FWH_DIGEST_MAX 64
 
@@ -169,6 +169,7 @@ FWH_API const char *fwh_image_description(const fwh_image_t *image);
 FWH_API int fwh_image_signed(const fwh_image_t *image);
 FWH_API size_t fwh_part_count(const fwh_image_t *image);
 FWH_API const fwh_part_t *fwh_part_get(const fwh_image_t *image, size_t index);
+FWH_API const fwh_part_t *fwh_part_find(const fwh_image_t *image, const char *name);
 FWH_API size_t fwh_meta_count(const fwh_image_t *image);
 FWH_API const fwh_meta_t *fwh_meta_get(const fwh_image_t *image, size_t index);
 FWH_API const char *fwh_meta_find(const fwh_image_t *image, const char *key);

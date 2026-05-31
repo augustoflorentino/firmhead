@@ -4,6 +4,19 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 1.5.0 - 2026-05-31
+
+### Added
+
+- `fwh_part_find` looks a part up by name, like `fwh_meta_find` does for metadata.
+- `firmhead-info -j` prints one JSON object per file with every image, part, metadata entry,
+  checksum, signature and finding. Text that is not printable ASCII is escaped, so the output
+  stays valid JSON on real firmware.
+
+### Changed
+
+- `firmhead-info` no longer prints images whose audit failed.
+
 ## 1.2.0 - 2026-05-31
 
 ### Added
