@@ -15,6 +15,13 @@ load unsigned images, keys that are present but not required, and ambiguous node
 It never decompresses, never reads files and never trusts a size field: every offset it returns
 lies inside the buffer it was given.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/map-dark.svg">
+    <img src="docs/map-light.svg" alt="Three vendor firmware files mapped by firmhead: a TP-Link safeloader with three uImages inside, a Reolink PAK with a device tree and a kernel, a Xiaomi HDR1 with its kernel and an RSA signature over the whole file" width="1000">
+  </picture>
+</p>
+
 ## Build and install
 
 ```sh
