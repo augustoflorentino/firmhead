@@ -84,6 +84,8 @@ FWH_INTERNAL int fwh_probe_pak(const unsigned char *buf, size_t buf_len, size_t 
 FWH_INTERNAL int fwh_probe_android(const unsigned char *buf, size_t buf_len, size_t offset);
 FWH_INTERNAL int fwh_probe_tplink(const unsigned char *buf, size_t buf_len, size_t offset);
 FWH_INTERNAL int fwh_parse_tplink(fwh_image_t *image, size_t offset);
+FWH_INTERNAL int fwh_probe_ubnt(const unsigned char *buf, size_t buf_len, size_t offset);
+FWH_INTERNAL int fwh_parse_ubnt(fwh_image_t *image, size_t offset);
 FWH_INTERNAL int fwh_probe_seama(const unsigned char *buf, size_t buf_len, size_t offset);
 FWH_INTERNAL int fwh_parse_android(fwh_image_t *image, size_t offset);
 FWH_INTERNAL int fwh_parse_seama(fwh_image_t *image, size_t offset);

@@ -44,7 +44,8 @@ extern "C" {
 #define FWH_FMT_ANDROID 11
 #define FWH_FMT_SEAMA 12
 #define FWH_FMT_TPLINK 13
-#define FWH_FMT_COUNT 14
+#define FWH_FMT_UBNT 14
+#define FWH_FMT_COUNT 15
 #define FWH_FMT_BIT(format) ((uint64_t)1 << (format))
 
 #define FWH_ROLE_OTHER 0
@@ -76,9 +77,9 @@ extern "C" {
 #define FWH_FIND_AMBIGUOUS_NODE 5
 
 #define FWH_VERSION_MAJOR 2
-#define FWH_VERSION_MINOR 0
+#define FWH_VERSION_MINOR 3
 #define FWH_VERSION_PATCH 0
-#define FWH_VERSION_STRING "2.0.0"
+#define FWH_VERSION_STRING "2.3.0"
 
 #define FWH_DIGEST_MAX 64
 

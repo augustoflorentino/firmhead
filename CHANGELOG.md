@@ -4,6 +4,17 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 2.3.0 - 2026-06-10
+
+### Added
+
+- Ubiquiti firmware (`FWH_FMT_UBNT`, `UBNT` and `OPEN` headers): version string, every `PART`
+  with its CRC32, the header CRC32 and the whole-image CRC32 of `END.` images. `ENDS` images
+  report their RSA-2048 signature slot with value and signed range, or `signature = empty slot`
+  when it is all zero, as in OpenWrt builds. Tested on the OpenWrt factory images for the
+  Bullet M XW, EdgeSwitch 8XP and NanoStation AC.
+- `FWH_FMT_COUNT` is now 15; existing format numbers are unchanged.
+
 ## 2.0.0 - 2026-05-31
 
 ### Changed

@@ -131,6 +131,17 @@ def tplink_v1() -> bytes:
     image[0x4C:0x5C] = hashlib.md5(image).digest()
     return bytes(image)
 
+def ubnt(signed: bool) -> bytes:
+    head = b"OPEN" + b"XW.ar934x.v6.0.4-42.OpenWrt-r33311".ljust(256, b"\0")
+    image = head + struct.pack(">II", zlib.crc32(head), 0)
+    for name, data in ((b"kernel", b"\x27\x05\x19\x56" + b"k" * 900), (b"rootfs", b"hsqs" + b"r" * 1500)):
+        part = b"PART" + name.ljust(16, b"\0") + bytes(12)
+        part += struct.pack(">6I", 0x80002000, 1, 0x9F050000, 0x80002000, len(data), len(data)) + data
+        image += part + struct.pack(">II", zlib.crc32(part), 0)
+    if signed:
+        return image + b"ENDS" + bytes(range(256)) + bytes(4)
+    return image + b"END." + struct.pack(">II", zlib.crc32(image), 0)
+
 SAMPLES = {
     "fwtool_signed.bin": sysupgrade,
     "fwtool_placeholder.bin": placeholder,
@@ -143,6 +154,8 @@ SAMPLES = {
     "android_v2.bin": lambda: android(2),
     "seama.bin": seama,
     "tplink_v1.bin": tplink_v1,
+    "ubnt.bin": lambda: ubnt(False),
+    "ubnt_signed.bin": lambda: ubnt(True),
 }
 
 def main() -> None:

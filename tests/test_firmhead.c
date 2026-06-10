@@ -47,6 +47,8 @@ static const sample_t samples[] = {
     {"android_v2.bin", 0, FWH_FMT_ANDROID, 5, 1, 0},
     {"seama.bin", 0x30, FWH_FMT_SEAMA, 1, 1, 0},
     {"tplink_v1.bin", 0, FWH_FMT_TPLINK, 2, 1, 0},
+    {"ubnt.bin", 0, FWH_FMT_UBNT, 2, 1, 0},
+    {"ubnt_signed.bin", 0, FWH_FMT_UBNT, 3, 1, 0},
     {"mkimage/weak-hash.itb", 0, FWH_FMT_FIT, 2, 1, 1},
     {"mkimage/weak-hash.control.dtb", 0, FWH_FMT_DTB, 0, 1, 1},
     {"mkimage/images-only.itb", 0, FWH_FMT_FIT, 2, 1, 1},

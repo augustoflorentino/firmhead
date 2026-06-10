@@ -296,6 +296,8 @@ static const unsigned char fwh_m_pak[] = {0x13, 0x59, 0x72, 0x32};
 static const unsigned char fwh_m_fdt[] = {0xd0, 0x0d, 0xfe, 0xed};
 static const unsigned char fwh_m_android[] = {'A', 'N', 'D', 'R', 'O', 'I', 'D', '!'};
 static const unsigned char fwh_m_seama[] = {0x5e, 0xa3, 0xa4, 0x17};
+static const unsigned char fwh_m_ubnt_open[] = {'O', 'P', 'E', 'N'};
+static const unsigned char fwh_m_ubnt[] = {'U', 'B', 'N', 'T'};
 static const unsigned char fwh_m_tplink[] = {0x01, 0x00, 0x00, 0x00};
 
 static const fwh_magic_t fwh_magic_table[] = {
@@ -312,6 +314,8 @@ static const fwh_magic_t fwh_magic_table[] = {
     {FWH_FMT_ANDROID, fwh_m_android, 8, 0},
     {FWH_FMT_SEAMA, fwh_m_seama, 4, 0},
     {FWH_FMT_TPLINK, fwh_m_tplink, 4, 0},
+    {FWH_FMT_UBNT, fwh_m_ubnt_open, 4, 0},
+    {FWH_FMT_UBNT, fwh_m_ubnt, 4, 0},
 };
 
 const fwh_magic_t *fwh_magics(size_t *out_count)
@@ -324,7 +328,7 @@ const fwh_magic_t *fwh_magics(size_t *out_count)
 static const fwh_parse_fn fwh_parsers[FWH_FMT_COUNT] = {
     NULL,           fwh_parse_uimage, fwh_parse_trx, fwh_parse_fwtool, fwh_parse_safeloader, fwh_parse_hdr1,
     fwh_parse_npk,  fwh_parse_chk,    fwh_parse_pak, fwh_parse_fit,    fwh_parse_dtb,    fwh_parse_android,
-    fwh_parse_seama, fwh_parse_tplink,
+    fwh_parse_seama, fwh_parse_tplink, fwh_parse_ubnt,
 };
 
 int fwh_probe(const unsigned char *buf, size_t buf_len, size_t offset, uint64_t *out_formats)
@@ -359,6 +363,8 @@ int fwh_probe(const unsigned char *buf, size_t buf_len, size_t offset, uint64_t 
         mask |= FWH_FMT_BIT(FWH_FMT_SEAMA);
     if (fwh_probe_tplink(buf, buf_len, offset))
         mask |= FWH_FMT_BIT(FWH_FMT_TPLINK);
+    if (fwh_probe_ubnt(buf, buf_len, offset))
+        mask |= FWH_FMT_BIT(FWH_FMT_UBNT);
     fdt = fwh_probe_fdt(buf, buf_len, offset);
     if (fdt)
         mask |= FWH_FMT_BIT(fdt);
@@ -552,7 +558,7 @@ const char *fwh_version(void)
 const char *fwh_format_name(int format)
 {
     static const char *const names[] = {"none", "uimage", "trx", "fwtool", "safeloader", "hdr1",
-                                        "npk",  "chk",    "pak", "fit",    "dtb",  "android", "seama", "tplink"};
+                                        "npk",  "chk",    "pak", "fit",    "dtb",  "android", "seama", "tplink", "ubnt"};
     return FWH_PICK(names, format);
 }
 

@@ -11,7 +11,7 @@ option(FIRMHEAD_BUILD_BENCH "Build benchmarks" OFF)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-add_library(firmhead src/image.c src/hash.c src/formats.c src/vendor.c src/boot.c src/tplink.c src/fdt.c src/audit.c)
+add_library(firmhead src/image.c src/hash.c src/formats.c src/vendor.c src/boot.c src/tplink.c src/ubnt.c src/fdt.c src/audit.c)
 add_library(firmhead::firmhead ALIAS firmhead)
 target_include_directories(firmhead PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -85,7 +85,7 @@ if(FIRMHEAD_BUILD_FUZZ)
     target_link_libraries(fuzz_open PRIVATE firmhead)
     target_link_options(fuzz_open PRIVATE -fsanitize=fuzzer)
     set(format_id 1)
-    foreach(format uimage trx fwtool safeloader hdr1 npk chk pak fit dtb android seama tplink)
+    foreach(format uimage trx fwtool safeloader hdr1 npk chk pak fit dtb android seama tplink ubnt)
         add_executable(fuzz_${format} fuzz/fuzz_open.c)
         target_compile_definitions(fuzz_${format} PRIVATE FWH_FUZZ_FORMAT=${format_id})
         target_link_libraries(fuzz_${format} PRIVATE firmhead)
