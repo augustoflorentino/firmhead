@@ -409,8 +409,27 @@ static int fwh_pick_format(const unsigned char *buf, size_t buf_len, size_t offs
     return FWH_FMT_NONE;
 }
 
-int fwh_open(const unsigned char *buf, size_t buf_len, size_t offset, int format, const fwh_allocator_t *allocator,
-             fwh_image_t **out_image, size_t *out_error_at)
+static int fwh_open_flags(fwh_image_t *image, unsigned flags)
+{
+    size_t i;
+
+    if ((flags & FWH_OPEN_AUDIT) && fwh_audit(image) != FWH_OK)
+        return FWH_ERR_NOMEM;
+    if (!(flags & FWH_OPEN_STRICT))
+        return FWH_OK;
+    for (i = 0; i < image->checks.count; i++) {
+        const fwh_checksum_t *check = (const fwh_checksum_t *)image->checks.items + i;
+
+        if (check->state == FWH_CHECK_BAD) {
+            image->error_at = (size_t)check->offset;
+            return FWH_ERR_DAMAGED;
+        }
+    }
+    return FWH_OK;
+}
+
+int fwh_open(const unsigned char *buf, size_t buf_len, size_t offset, int format, unsigned flags,
+             const fwh_allocator_t *allocator, fwh_image_t **out_image, size_t *out_error_at)
 {
     fwh_alloc_fn alloc_fn = allocator ? allocator->alloc : NULL;
     fwh_free_fn free_fn = allocator ? allocator->free : NULL;
@@ -421,7 +440,7 @@ int fwh_open(const unsigned char *buf, size_t buf_len, size_t offset, int format
     if (out_error_at)
         *out_error_at = offset;
     if (out_image == NULL || (buf == NULL && buf_len) || (alloc_fn == NULL) != (free_fn == NULL) || format < 0 ||
-        format >= FWH_FMT_COUNT)
+        format >= FWH_FMT_COUNT || (flags & ~(FWH_OPEN_AUDIT | FWH_OPEN_STRICT)))
         return FWH_ERR_ARG;
     *out_image = NULL;
     if (offset >= buf_len)
@@ -446,6 +465,8 @@ int fwh_open(const unsigned char *buf, size_t buf_len, size_t offset, int format
     image->description = "";
     image->error_at = offset;
     status = fwh_parsers[format](image, offset);
+    if (status == FWH_OK)
+        status = fwh_open_flags(image, flags);
     if (status != FWH_OK) {
         if (out_error_at)
             *out_error_at = image->error_at;

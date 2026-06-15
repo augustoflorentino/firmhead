@@ -11,6 +11,6 @@ int main(void)
 
     if (status != FWH_OK || formats != 0 || fwh_crc32(0, (const unsigned char *)"123456789", 9) != 0xCBF43926u)
         return 1;
-    status = fwh_open(header, sizeof(header), 0, FWH_FMT_UIMAGE, NULL, &image, &error_at);
+    status = fwh_open(header, sizeof(header), 0, FWH_FMT_UIMAGE, 0, NULL, &image, &error_at);
     return status == FWH_ERR_DAMAGED && image == NULL && error_at == 4 ? 0 : 1;
 }

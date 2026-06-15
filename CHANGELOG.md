@@ -4,6 +4,26 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 3.0.0 - 2026-06-15
+
+### Changed
+
+- `fwh_open` takes a `flags` argument after the format. `FWH_OPEN_AUDIT` runs `fwh_audit`
+  before returning; `FWH_OPEN_STRICT` rejects an image whose checksums include a `bad` one with
+  `FWH_ERR_DAMAGED`, with `out_error_at` at the start of the failing range. Unknown flags are
+  `FWH_ERR_ARG`. A carver that only wants intact images no longer has to walk the checksums
+  itself.
+- `firmhead-info` opens with `FWH_OPEN_AUDIT`.
+- The shared library is now `libfirmhead.so.3`.
+
+### Upgrading
+
+- Insert `0` as the fifth argument to keep the 2.x behaviour:
+  `fwh_open(buf, len, offset, format, 0, NULL, &image, &at)`.
+- Code that called `fwh_audit` right after `fwh_open` can pass `FWH_OPEN_AUDIT` instead;
+  calling `fwh_audit` again is still allowed and does nothing.
+- Relink against `libfirmhead.so.3`.
+
 ## 2.6.0 - 2026-06-15
 
 ### Added

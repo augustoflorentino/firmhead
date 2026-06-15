@@ -67,6 +67,8 @@ Conventions:
 - what `fwh_open` returns is released only by `fwh_image_destroy`, which accepts `NULL`
 - functions never take ownership of their arguments; returned pointers belong to the library
 - pass a `fwh_allocator_t` to `fwh_open`, or `NULL` for `malloc`/`free`
+- `fwh_open` flags: `FWH_OPEN_AUDIT` runs `fwh_audit` before returning, `FWH_OPEN_STRICT`
+  refuses an image with any `bad` checksum (`FWH_ERR_DAMAGED`, `error_at` points at it)
 - the image borrows the buffer: keep it alive and unchanged until `fwh_image_destroy`
 
 ## Versioning

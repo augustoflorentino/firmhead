@@ -207,14 +207,10 @@ static void scan(const unsigned char *buf, size_t len, int json)
     for (offset = 0; offset < len; offset++) {
         if (fwh_probe(buf, len, offset, &formats) != FWH_OK || formats == 0)
             continue;
-        status = fwh_open(buf, len, offset, FWH_FMT_NONE, NULL, &image, &error_at);
+        status = fwh_open(buf, len, offset, FWH_FMT_NONE, FWH_OPEN_AUDIT, NULL, &image, &error_at);
         if (status != FWH_OK) {
             if (!json)
                 printf("0x%zx: %s at 0x%zx\n", offset, fwh_strerror(status), error_at);
-            continue;
-        }
-        if (fwh_audit(image) != FWH_OK) {
-            fwh_image_destroy(image);
             continue;
         }
         if (json)

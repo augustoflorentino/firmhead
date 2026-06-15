@@ -33,7 +33,7 @@ int main(int argc, char **argv)
         for (r = 0; r < 20; r++) {
             image = NULL;
             t = now();
-            fwh_open(buf, len, 0, FWH_FMT_NONE, NULL, &image, &err);
+            fwh_open(buf, len, 0, FWH_FMT_NONE, 0, NULL, &image, &err);
             fwh_audit(image);
             t = now() - t;
             if (t < best)
