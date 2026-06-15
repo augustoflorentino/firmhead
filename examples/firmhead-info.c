@@ -196,8 +196,19 @@ static void json_image(const fwh_image_t *image, int first)
     printf("}");
 }
 
-static void scan(const unsigned char *buf, size_t len, int json)
+static int damaged(const fwh_image_t *image)
 {
+    size_t i;
+
+    for (i = 0; i < fwh_checksum_count(image); i++)
+        if (fwh_checksum_get(image, i)->state == FWH_CHECK_BAD)
+            return 1;
+    return 0;
+}
+
+static int scan(const unsigned char *buf, size_t len, int json)
+{
+    int bad = 0;
     size_t found = 0;
     size_t offset, error_at;
     uint64_t formats;
@@ -217,15 +228,17 @@ static void scan(const unsigned char *buf, size_t len, int json)
             json_image(image, found++ == 0);
         else
             print_image(image);
+        bad |= damaged(image);
         fwh_image_destroy(image);
     }
+    return bad;
 }
 
 int main(int argc, char **argv)
 {
     unsigned char *buf;
     size_t len = 0;
-    int i, json = argc > 1 && strcmp(argv[1], "-j") == 0;
+    int i, bad = 0, json = argc > 1 && strcmp(argv[1], "-j") == 0;
 
     if (argc == 2 && strcmp(argv[1], "-V") == 0) {
         printf("firmhead %s\n", fwh_version());
@@ -247,9 +260,9 @@ int main(int argc, char **argv)
         } else {
             printf("== %s\n", argv[i]);
         }
-        scan(buf, len, json);
+        bad |= scan(buf, len, json);
         printf(json ? "]}\n" : "");
         free(buf);
     }
-    return 0;
+    return bad ? 3 : 0;
 }

@@ -4,6 +4,13 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 3.2.0 - 2026-06-15
+
+### Changed
+
+- `firmhead-info` exits with status 3 when any image it found has a `bad` checksum, 1 on read
+  errors and 0 otherwise.
+
 ## 3.0.0 - 2026-06-15
 
 ### Changed
