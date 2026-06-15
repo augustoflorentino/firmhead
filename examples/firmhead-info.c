@@ -166,8 +166,9 @@ static void json_signing(const fwh_image_t *image)
         json_key("algorithm", s->algorithm, 0);
         json_key("key", s->key_hint, 0);
         json_key("scope", fwh_scope_name(s->scope), 0);
-        printf("\"value_offset\":%llu,\"value_size\":%llu}", (unsigned long long)s->value_offset,
-               (unsigned long long)s->value_size);
+        printf("\"value_offset\":%llu,\"value_size\":%llu,\"signed_offset\":%llu,\"signed_size\":%llu}",
+               (unsigned long long)s->value_offset, (unsigned long long)s->value_size,
+               (unsigned long long)s->signed_offset, (unsigned long long)s->signed_size);
     }
     printf("],\"findings\":[");
     for (i = 0; i < fwh_finding_count(image); i++) {
@@ -230,8 +231,12 @@ int main(int argc, char **argv)
     size_t len = 0;
     int i, json = argc > 1 && strcmp(argv[1], "-j") == 0;
 
+    if (argc == 2 && strcmp(argv[1], "-V") == 0) {
+        printf("firmhead %s\n", fwh_version());
+        return 0;
+    }
     if (argc < 2 + json) {
-        fprintf(stderr, "usage: %s [-j] firmware...\n", argv[0]);
+        fprintf(stderr, "usage: %s [-V] [-j] firmware...\n", argv[0]);
         return 2;
     }
     for (i = 1 + json; i < argc; i++) {

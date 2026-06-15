@@ -562,6 +562,18 @@ const char *fwh_format_name(int format)
     return FWH_PICK(names, format);
 }
 
+int fwh_format_from_name(const char *name)
+{
+    int format;
+
+    if (name == NULL)
+        return FWH_FMT_NONE;
+    for (format = 1; format < FWH_FMT_COUNT; format++)
+        if (strcmp(fwh_format_name(format), name) == 0)
+            return format;
+    return FWH_FMT_NONE;
+}
+
 const char *fwh_role_name(int role)
 {
     static const char *const names[] = {"other",    "kernel", "rootfs", "fdt",       "ramdisk",

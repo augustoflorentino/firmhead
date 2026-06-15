@@ -319,6 +319,8 @@ static void test_arguments(void)
     EXPECT(fwh_open(zero, sizeof(zero), 65, FWH_FMT_NONE, NULL, &image, &error_at) == FWH_ERR_TRUNCATED);
     EXPECT(fwh_open(zero, sizeof(zero), 0, 99, NULL, &image, &error_at) == FWH_ERR_ARG);
     EXPECT(strcmp(fwh_version(), FWH_VERSION_STRING) == 0);
+    EXPECT(fwh_format_from_name("ubnt") == FWH_FMT_UBNT);
+    EXPECT(fwh_format_from_name("none") == FWH_FMT_NONE && fwh_format_from_name(NULL) == FWH_FMT_NONE);
     EXPECT(fwh_probe(zero, sizeof(zero), 0, &formats) == FWH_OK && formats == 0);
     EXPECT(fwh_audit(NULL) == FWH_ERR_ARG);
     fwh_image_destroy(NULL);

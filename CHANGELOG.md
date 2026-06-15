@@ -4,6 +4,14 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 2.6.0 - 2026-06-15
+
+### Added
+
+- `fwh_format_from_name`, the reverse of `fwh_format_name`.
+- `firmhead-info -V` prints the library version; `-j` now includes the signed range of each
+  signature.
+
 ## 2.3.0 - 2026-06-10
 
 ### Added

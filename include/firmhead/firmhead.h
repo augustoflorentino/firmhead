@@ -77,9 +77,9 @@ extern "C" {
 #define FWH_FIND_AMBIGUOUS_NODE 5
 
 #define FWH_VERSION_MAJOR 2
-#define FWH_VERSION_MINOR 3
+#define FWH_VERSION_MINOR 6
 #define FWH_VERSION_PATCH 0
-#define FWH_VERSION_STRING "2.3.0"
+#define FWH_VERSION_STRING "2.6.0"
 
 #define FWH_DIGEST_MAX 64
 
@@ -195,6 +195,7 @@ FWH_API uint32_t fwh_netgear_sum(const unsigned char *data, size_t data_len);
 FWH_API const char *fwh_version(void);
 FWH_API const char *fwh_strerror(int status);
 FWH_API const char *fwh_format_name(int format);
+FWH_API int fwh_format_from_name(const char *name);
 FWH_API const char *fwh_role_name(int role);
 FWH_API const char *fwh_scope_name(int scope);
 FWH_API const char *fwh_check_name(int state);
